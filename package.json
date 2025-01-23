@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+  "discord.js": "^14.0.0",
+  "discord-api-types": "^0.39.0",
+  "@discordjs/rest": "^1.0.0"
+}
+
+}
