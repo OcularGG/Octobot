@@ -16,7 +16,7 @@ module.exports = (client) => {
         if (message.author.bot) return;
   
         // 2. Check if the message is in one of the channels defined in our lookup
-        if (!channelReactions.hasOwnProperty(message.channel.id)) return;
+        if (!channelReactions[message.channel.id]) return;
   
         // 3. If the message is a reply to another message, skip it
         if (message.reference) return;
