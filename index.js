@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const roleSelector = require('./roleSelector'); // Path to roleSelector.js
 const logRoleHierarchy = require('./logRoleHierarchy'); // Path to logRoleHierarchy.js
-
+const autoReaction = require('./autoReaction'); // Path to autoReaction.js
 // Create a new client instance
 const client = new Client({
   intents: [
@@ -56,6 +56,9 @@ client.on('ready', () => {
 
   // Log the role hierarchy when the bot is ready
   logRoleHierarchy(client);
+
+  // Start automatically reacting to new messages
+  autoReaction(client);
 });
 
 // Log in to Discord with the app's token
