@@ -3,9 +3,9 @@
 module.exports = (client) => {
     // Define a lookup table mapping channel IDs to reaction emojis
     const channelReactions = {
-      'CHANNEL_ID_1': '👍',  // Replace with actual channel ID and your chosen emoji
-      'CHANNEL_ID_2': '🎉',  // ...
-      'CHANNEL_ID_3': '🔥',
+      '1100847035013419114': '<:Ocular:1324391933635727380>',  // Replace with actual channel ID and your chosen emoji
+      //'CHANNEL_ID_2': '🎉',  // ...
+      //'CHANNEL_ID_3': '🔥',
       // Add as many channel-to-emoji mappings as you need
     };
   
