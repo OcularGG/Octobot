@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const roleSelector = require('./roleSelector'); // Path to roleSelector.js
 const logRoleHierarchy = require('./logRoleHierarchy'); // Path to logRoleHierarchy.js
+const autoReaction = require('./autoReaction'); // Path to autoReaction.js
 
 // Create a new client instance
 const client = new Client({
@@ -12,6 +13,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.GuildMessageReactions,  // Add this line for reactions
   ],
 });
 
@@ -55,8 +57,13 @@ client.on('ready', () => {
   roleSelector(client);
 
   // Log the role hierarchy when the bot is ready
-  logRoleHierarchy(client);
+  //logRoleHierarchy(client);
+
+  // Call the autoReaction function to add reactions to messages in specific channels
+autoReaction(client);
 });
+
+
 
 // Log in to Discord with the app's token
 client.login(token);
