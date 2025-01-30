@@ -5,11 +5,13 @@ const path = require('path');
 const roleSelector = require('./roleSelector'); // Path to roleSelector.js
 const logRoleHierarchy = require('./logRoleHierarchy'); // Path to logRoleHierarchy.js
 const autoReaction = require('./autoReaction'); // Path to autoReaction.js
+const initializeWelcome = require('./welcomeSignUp'); //path to welcomeSignUp.js
 
 // Create a new client instance
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
@@ -61,6 +63,9 @@ client.on('ready', () => {
 
   // Call the autoReaction function to add reactions to messages in specific channels
 autoReaction(client);
+
+//call the initializeWelcome function to send a welcome message to new members
+initializeWelcome(client);
 });
 
 
