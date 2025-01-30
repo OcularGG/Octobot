@@ -56,7 +56,7 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Call the roleSelector function to send the role selection embed
-  //roleSelector(client);
+  roleSelector(client);
 
   // Log the role hierarchy when the bot is ready
   //logRoleHierarchy(client);
