@@ -1,4 +1,4 @@
-//welcomeSignUp.js
+//welcomeSignUp.js UPDATED
 const {PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 
 
@@ -11,7 +11,7 @@ module.exports = (client) => {
       const ocularPublicChannel = await client.channels.fetch(channelId);
 
       if (ocularPublicChannel) {
-        console.log('Found Ocular General channel. Sending embed...');
+        console.log('Found Ocular Public channel. Sending embed...');
 
         // Create the welcome embed
         const welcomeEmbed = new EmbedBuilder()
@@ -203,11 +203,11 @@ if (interaction.customId === 'modal_apply_ocular') {
         .setColor('#0099FF')
         .setTitle('Ocular Application Submission')
         .addFields(
-          { name: 'Character Name:', value: characterName, inline: true },
-          { name: 'Active Times:', value: activeTimes, inline: true },
-          { name: 'Past Guilds:', value: pastGuilds, inline: true },
-          { name: 'Roads or BZ?:', value: contentType, inline: true },
-          { name: 'Can a member vouch for you?:', value: vouchMember, inline: true }
+          { name: 'Character Name', value: characterName, inline: true },
+          { name: 'Active Times', value: activeTimes, inline: true },
+          { name: 'Past Guilds', value: pastGuilds, inline: true },
+          { name: 'Roads or BZ?', value: contentType, inline: true },
+          { name: 'Can a member vouch for you?', value: vouchMember, inline: true }
         )
         .setTimestamp()
         .setFooter({ text: 'Ocular Application' });
@@ -215,7 +215,8 @@ if (interaction.customId === 'modal_apply_ocular') {
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('accept_ocl').setLabel('Accept OCL').setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId('accept_uni').setLabel('Accept Uni').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('decline').setLabel('Decline').setStyle(ButtonStyle.Danger)
+        new ButtonBuilder().setCustomId('decline').setLabel('Decline').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('deleteChannel2').setLabel('Delete Ticket').setStyle(ButtonStyle.Danger)
       );
   
       const message = await channel.send({
@@ -227,6 +228,14 @@ if (interaction.customId === 'modal_apply_ocular') {
       await channel.permissionOverwrites.create(applicant.id, {
         ViewChannel: true,
         SendMessages: true,
+      });
+           //set nickname
+      await interaction.member.setNickname(characterName)
+      .then(() => {
+        console.log(`Nickname set to ${characterName}`);
+      })
+      .catch((error) => {
+        console.error('Error setting nickname:', error);
       });
   
       await interaction.reply({
@@ -288,9 +297,14 @@ if (interaction.customId === 'modal_apply_ocular') {
         .setCustomId('trusted')
         .setLabel('Trusted')
         .setStyle(ButtonStyle.Success); // Green button
+
+      const deleteButton = new ButtonBuilder()
+        .setCustomId('deleteChannel')
+        .setLabel('Delete Ticket')
+        .setStyle(ButtonStyle.Danger); // Red button
   
       // Add the buttons to the action row
-      const actionRow = new ActionRowBuilder().addComponents(vouchedButton, trustedButton);
+      const actionRow = new ActionRowBuilder().addComponents(vouchedButton, trustedButton, deleteButton);
     
       // Send the embed and buttons to the newly created channel
       await channel.send({
@@ -306,7 +320,16 @@ if (interaction.customId === 'modal_apply_ocular') {
         ViewChannel: true,
         SendMessages: true,
       });
-    
+
+      //set nickname
+await interaction.member.setNickname(characterName)
+      .then(() => {
+        console.log(`Nickname set to ${characterName}`);
+      })
+      .catch((error) => {
+        console.error('Error setting nickname:', error);
+      });
+
       // Reply to the user that their submission has been processed
       await interaction.reply({
         content: `Thank you for applying to be a friend! A custom channel has been created for your application: <#${channel.id}>`,
@@ -370,7 +393,16 @@ if (interaction.customId === 'modal_apply_ocular') {
             ViewChannel: true,
             SendMessages: true,
           });
-      
+
+          //set nickname
+      await interaction.member.setNickname(characterName)
+      .then(() => {
+        console.log(`Nickname set to ${characterName}`);
+      })
+      .catch((error) => {
+        console.error('Error setting nickname:', error);
+      });
+
           // Reply to the user that their submission has been processed
           await interaction.reply({
             content: `Thank you for your diplomatic inquiry! A custom channel has been created for your inquiry: <#${channel.id}>`,
@@ -390,6 +422,56 @@ if (interaction.customId === 'modal_apply_ocular') {
           client.on('interactionCreate', async (interaction) => {
             if (!interaction.isButton()) return;
             //Friend APP button logic
+
+            if (interaction.customId === 'deleteChannel') {
+              // Check if the member has Administrator permission or a specific role
+              const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+              
+              if (!hasPermission) {
+                  // If the user doesn't have permission, send a message informing them
+                  await interaction.reply({
+                      content: 'You do not have permission to delete this channel.',
+                      ephemeral: true, // Make this message visible only to the user
+                  });
+                  return; // Exit the function to prevent the channel from being deleted
+              }
+      
+              // Get the channel where the interaction occurred
+              const channel = interaction.channel;
+      
+              try {
+                  // Delete the channel
+                  await channel.delete();
+                  console.log(`Channel ${channel.name} has been deleted.`);
+              } catch (error) {
+                  console.error(`Error deleting the channel: ${error.message}`);
+              }
+          }
+            
+            if (interaction.customId === 'deleteChannel2') {
+              // Check if the member has Administrator permission or a specific role
+              const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+              
+              if (!hasPermission) {
+                  // If the user doesn't have permission, send a message informing them
+                  await interaction.reply({
+                      content: 'You do not have permission to delete this channel.',
+                      ephemeral: true, // Make this message visible only to the user
+                  });
+                  return; // Exit the function to prevent the channel from being deleted
+              }
+      
+              // Get the channel where the interaction occurred
+              const channel = interaction.channel;
+      
+              try {
+                  // Delete the channel
+                  await channel.delete();
+                  console.log(`Channel ${channel.name} has been deleted.`);
+              } catch (error) {
+                  console.error(`Error deleting the channel: ${error.message}`);
+              }
+          }
 
             if (interaction.customId === 'vouched') {
                 // Fetch the channel topic and extract the applicant ID
@@ -415,9 +497,29 @@ if (interaction.customId === 'modal_apply_ocular') {
                     ephemeral: true,
                   });
                 }
-              
+                if (applicant.nickname) {
+                  // Add "[F]" in front of the applicant's current nickname
+                  const newNickname = `[F] ${applicant.nickname}`;
+          
+                  // Change the applicant's nickname
+                  try {
+                      await applicant.setNickname(newNickname);
+                      console.log(`Applicant's nickname changed to: ${newNickname}`);
+                  } catch (error) {
+                      console.error('Error setting nickname:', error);
+                      return interaction.reply({
+                          content: 'There was an error setting the applicant\'s nickname.',
+                          ephemeral: true,
+                      });
+                  }
+              } else {
+                  return interaction.reply({
+                      content: 'Applicant does not have a nickname set, cannot modify it.',
+                      ephemeral: true,
+                  });
+              }
                 // Check if the user interacting has the correct permissions
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1326597598479515718');
+                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
               
                 if (!hasPermission) {
                   return interaction.reply({
@@ -428,7 +530,7 @@ if (interaction.customId === 'modal_apply_ocular') {
               
                 try {
                   // Fetch the role by ID
-                  const role = await interaction.guild.roles.cache.get('1291845658092769382');
+                  const role = await interaction.guild.roles.cache.get('1336395198904799355');
               
                   if (!role) {
                     return interaction.reply({
@@ -466,10 +568,31 @@ if (interaction.customId === 'modal_apply_ocular') {
                         ephemeral: true,
                     });
                 }
+            if (applicant.nickname) {
+                // Add "[TF]" in front of the applicant's current nickname
+                const newNickname = `[TF] ${applicant.nickname}`;
+        
+                // Change the applicant's nickname
+                try {
+                    await applicant.setNickname(newNickname);
+                    console.log(`Applicant's nickname changed to: ${newNickname}`);
+                } catch (error) {
+                    console.error('Error setting nickname:', error);
+                    return interaction.reply({
+                        content: 'There was an error setting the applicant\'s nickname.',
+                        ephemeral: true,
+                    });
+                }
+            } else {
+                return interaction.reply({
+                    content: 'Applicant does not have a nickname set, cannot modify it.',
+                    ephemeral: true,
+                });
+            }
             
                 try {
                     // Assign the 'trusted' role to the applicant
-                    const role = await interaction.guild.roles.cache.get('1291845658092769382');
+                    const role = await interaction.guild.roles.cache.get('1336395197730521133');
                     if (role) {
                         await applicant.roles.add(role);
                         return interaction.reply({
@@ -492,7 +615,7 @@ if (interaction.customId === 'modal_apply_ocular') {
             }
             //Ocular APP button logic
             if (interaction.customId === 'accept_ocl') {
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1326597598479515718');
+                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
                 const channel = interaction.channel;
               const topic = channel.topic;
               const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
@@ -512,10 +635,33 @@ if (interaction.customId === 'modal_apply_ocular') {
               }
           
               const applicant = await interaction.guild.members.fetch(applicantId);
+
+              if (applicant.nickname) {
+                // Add "[OCL]" in front of the applicant's current nickname
+                const newNickname = `[OCL] ${applicant.nickname}`;
+        
+                // Change the applicant's nickname
+                try {
+                    await applicant.setNickname(newNickname);
+                    console.log(`Applicant's nickname changed to: ${newNickname}`);
+                } catch (error) {
+                    console.error('Error setting nickname:', error);
+                    return interaction.reply({
+                        content: 'There was an error setting the applicant\'s nickname.',
+                        ephemeral: true,
+                    });
+                }
+            } else {
+                return interaction.reply({
+                    content: 'Applicant does not have a nickname set, cannot modify it.',
+                    ephemeral: true,
+                });
+              }
+              
           
               // Assign roles for 'accept_ocl'
-              const oclRole = interaction.guild.roles.cache.get('1100835041518559383');
-              const portalerRole = interaction.guild.roles.cache.get('1230241426634182830');
+              const oclRole = interaction.guild.roles.cache.get('1336395193980817458');
+              const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
           
               if (oclRole && portalerRole) {
                 await applicant.roles.add([oclRole, portalerRole]);
@@ -537,7 +683,7 @@ if (interaction.customId === 'modal_apply_ocular') {
             }
           //Uni APP button logic
             if (interaction.customId === 'accept_uni') {
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1326597598479515718');
+                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
                 const channel = interaction.channel;
               const topic = channel.topic;
               const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
@@ -557,10 +703,31 @@ if (interaction.customId === 'modal_apply_ocular') {
               }
           
               const applicant = await interaction.guild.members.fetch(applicantId);
-          
+
+              if (applicant.nickname) {
+                // Add "[OCLU]" in front of the applicant's current nickname
+                const newNickname = `[OCLU] ${applicant.nickname}`;
+        
+                // Change the applicant's nickname
+                try {
+                    await applicant.setNickname(newNickname);
+                    console.log(`Applicant's nickname changed to: ${newNickname}`);
+                } catch (error) {
+                    console.error('Error setting nickname:', error);
+                    return interaction.reply({
+                        content: 'There was an error setting the applicant\'s nickname.',
+                        ephemeral: true,
+                    });
+                }
+            } else {
+                return interaction.reply({
+                    content: 'Applicant does not have a nickname set, cannot modify it.',
+                    ephemeral: true,
+                });
+            }
               // Assign roles for 'accept_uni'
-              const uniRole = interaction.guild.roles.cache.get('1326596524628770927');
-              const portalerRole = interaction.guild.roles.cache.get('1230241426634182830');
+              const uniRole = interaction.guild.roles.cache.get('1336395194995834971');
+              const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
           
               if (uniRole && portalerRole) {
                 await applicant.roles.add([uniRole, portalerRole]);
@@ -582,7 +749,7 @@ if (interaction.customId === 'modal_apply_ocular') {
             }
           //Decline button logic
             if (interaction.customId === 'decline') {
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1326597598479515718');
+                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
 
               if (!hasPermission) {
                 return interaction.reply({

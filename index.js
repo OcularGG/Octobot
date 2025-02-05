@@ -1,3 +1,4 @@
+//INDEX.JS UPDATED
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { token, clientId, guildId } = require('./config.json');
 const fs = require('fs');
@@ -56,7 +57,7 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Call the roleSelector function to send the role selection embed
-  roleSelector(client);
+  //roleSelector(client);
 
   // Log the role hierarchy when the bot is ready
   //logRoleHierarchy(client);
