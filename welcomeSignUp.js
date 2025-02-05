@@ -20,6 +20,7 @@ module.exports = (client) => {
           .setDescription(`Welcome **${member.user.username}** to the OCULAR Community, a member of our __Welcome Committee__ will be by to say hello shortly!`)
           .setThumbnail(member.user.displayAvatarURL())
           .setTimestamp()
+          .setImage('attachment://welcome.jpg');
           .setFooter({ text: 'Enjoy your stay!' });
 
         // Create the buttons
