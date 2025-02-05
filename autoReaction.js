@@ -1,3 +1,4 @@
+
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 
 module.exports = (client) => {

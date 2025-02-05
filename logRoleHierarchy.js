@@ -1,4 +1,4 @@
-// logRoleHierarchy.js
+// logRoleHierarchy.js UPDATED
 module.exports = async (client) => {
     try {
       console.log('Attempting to fetch guild...');
