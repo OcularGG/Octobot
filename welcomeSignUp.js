@@ -474,94 +474,96 @@ await interaction.member.setNickname(characterName)
               }
           }
 
-            if (interaction.customId === 'vouched') {
-                // Fetch the channel topic and extract the applicant ID
-                const channel = interaction.channel;
-                const topic = channel.topic;
-                const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
-              
-                // Ensure that applicantId is present
-                if (!applicantId) {
-                  return interaction.reply({
-                    content: 'Could not find the applicant ID in the channel topic.',
-                    ephemeral: true,
-                  });
-                }
-              
-                // Fetch the applicant member from the guild
-                let applicant;
-                try {
-                  applicant = await interaction.guild.members.fetch(applicantId);
-                } catch (error) {
-                  return interaction.reply({
-                    content: 'Could not find the applicant member in the guild.',
-                    ephemeral: true,
-                  });
-                }
-                if (applicant.nickname) {
-                  // Add "[F]" in front of the applicant's current nickname
-                  const newNickname = `[F] ${applicant.nickname}`;
-          
-                  // Change the applicant's nickname
-                  try {
-                      await applicant.setNickname(newNickname);
-                      console.log(`Applicant's nickname changed to: ${newNickname}`);
-                  } catch (error) {
-                      console.error('Error setting nickname:', error);
-                      return interaction.reply({
-                          content: 'There was an error setting the applicant\'s nickname.',
-                          ephemeral: true,
-                      });
-                  }
-              } else {
-                  return interaction.reply({
-                      content: 'Applicant does not have a nickname set, cannot modify it.',
-                      ephemeral: true,
-                  });
-              }
-                // Check if the user interacting has the correct permissions
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-              
-                if (!hasPermission) {
-                  return interaction.reply({
+          if (interaction.customId === 'vouched') {
+            // Check if the user has the required permission first
+            const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+            if (!hasPermission) {
+                return interaction.reply({
                     content: 'You do not have permission to use this button.',
                     ephemeral: true,
-                  });
-                }
-              
-                try {
-                  // Fetch the role by ID
-                  const role = await interaction.guild.roles.cache.get('1336395198904799355');
-              
-                  if (!role) {
-                    return interaction.reply({
-                      content: 'The role could not be found.',
+                });
+            }
+        
+            // Fetch the channel topic and extract the applicant ID
+            const channel = interaction.channel;
+            const topic = channel.topic;
+            const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
+          
+            // Ensure that applicantId is present
+            if (!applicantId) {
+              return interaction.reply({
+                content: 'Could not find the applicant ID in the channel topic.',
+                ephemeral: true,
+              });
+            }
+          
+            // Fetch the applicant member from the guild
+            let applicant;
+            try {
+              applicant = await interaction.guild.members.fetch(applicantId);
+            } catch (error) {
+              return interaction.reply({
+                content: 'Could not find the applicant member in the guild.',
+                ephemeral: true,
+              });
+            }
+        
+            if (applicant.nickname) {
+              // Add "[F]" in front of the applicant's current nickname
+              const newNickname = `[F] ${applicant.nickname}`;
+        
+              // Change the applicant's nickname
+              try {
+                  await applicant.setNickname(newNickname);
+                  console.log(`Applicant's nickname changed to: ${newNickname}`);
+              } catch (error) {
+                  console.error('Error setting nickname:', error);
+                  return interaction.reply({
+                      content: 'There was an error setting the applicant\'s nickname.',
                       ephemeral: true,
-                    });
-                  }
-              
-                  // Add the 'vouched' role to the applicant
-                  await applicant.roles.add(role);
-              
-                  return interaction.reply({
-                    content: `The applicant has been successfully vouched and given the role: ${role.name}`,
-                    ephemeral: true,
                   });
-                } catch (error) {
-                  console.error('Error assigning role:', error);
-                  return interaction.reply({
-                    content: 'There was an error assigning the role to the applicant. Please try again later.',
-                    ephemeral: true,
-                  });
-                }
               }
+          } else {
+              return interaction.reply({
+                  content: 'Applicant does not have a nickname set, cannot modify it.',
+                  ephemeral: true,
+              });
+          }
+        
+            try {
+              // Fetch the role by ID
+              const role = await interaction.guild.roles.cache.get('1336395198904799355');
+          
+              if (!role) {
+                return interaction.reply({
+                  content: 'The role could not be found.',
+                  ephemeral: true,
+                });
+              }
+          
+              // Add the 'vouched' role to the applicant
+              await applicant.roles.add(role);
+          
+              return interaction.reply({
+                content: `The applicant has been successfully vouched and given the role: ${role.name}`,
+                ephemeral: true,
+              });
+            } catch (error) {
+              console.error('Error assigning role:', error);
+              return interaction.reply({
+                content: 'There was an error assigning the role to the applicant. Please try again later.',
+                ephemeral: true,
+              });
+            }
+        }
+        
             if (interaction.customId === 'trusted') {
                 // Fetch the applicant's member from the guild
                 const channel = interaction.channel;
                 const topic = channel.topic;
                 const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
                 const applicant = await interaction.guild.members.fetch(applicantId); // Ensure `applicantId` is properly defined or passed
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1326597598479515718');
+                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
             
                 if (!hasPermission) {
                     return interaction.reply({
