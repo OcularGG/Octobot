@@ -3,97 +3,123 @@ const {PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butto
 const { createCanvas, loadImage } = require('canvas');
 const fs = require('fs');
 const path = require('path');
-
+const axios = require('axios');
+const sharp = require('sharp');
 
 module.exports = (client) => {
   
   // Your existing event listener
-  client.on('guildMemberAdd', async (member) => {
-    const channelId = '1099496723086323712'; // Channel to send the welcome embed
-  
-    try {
-      // Fetch the channel using the provided channel ID
-      const ocularPublicChannel = await client.channels.fetch(channelId);
-  
-      if (ocularPublicChannel) {
-        console.log('Found Ocular Public channel. Sending embed...');
-      
-        // Path to your static welcome image with the transparent hole (now "welcome.png")
-        const welcomeImagePath = path.join(__dirname, 'welcome.png');
-        const pfpUrl = member.user.displayAvatarURL({ format: 'png', size: 256 }); // Profile Picture URL
-      
-        // Load the welcome image and user's profile picture (if it's a GIF, treat as static)
-        const welcomeImage = await loadImage(welcomeImagePath);
-        const pfpImage = await loadImage(pfpUrl); // loadImage can handle PNG, JPG, and GIF
-      
-        // Create canvas with the same size as the welcome image
-        const canvas = createCanvas(welcomeImage.width, welcomeImage.height);
-        const ctx = canvas.getContext('2d');
-      
-        // Draw the profile picture first (as bottom layer)
-        const pfpX = 689.5;
-        const pfpY = 22;  
-        const pfpWidth = 256;
-        const pfpHeight = 256; 
-        ctx.drawImage(pfpImage, pfpX, pfpY, pfpWidth, pfpHeight); // Draw the PFP as the bottom layer
-      
-        // Now draw the welcome image (top layer)
-        ctx.drawImage(welcomeImage, 0, 0);
-      
-        // Generate a unique filename for the image using the member's ID
-        const outputPath = path.join(__dirname, `outputWelcomeImage_${member.id}.png`);
-      
-        // Save the generated image
-        const out = fs.createWriteStream(outputPath);
-        const stream = canvas.createPNGStream();
-        stream.pipe(out);
-      
-        out.on('finish', async () => {
-            // Create the welcome embed
-            const welcomeEmbed = new EmbedBuilder()
-                .setColor('#00FF00') // Green color for the welcome message
-                .setTitle('Welcome to Ocular!')
-                .setDescription(`Welcome **${member.user.username}** to the OCULAR Community, a member of our **__Welcome Committee__** will be by to say hello shortly!`)
-                .setTimestamp()
-                .setImage(`attachment://welcomeImage_${member.id}.png`) // Attach the generated image
-                .setFooter({ text: 'Enjoy your stay!' });
-      
-            // Create the buttons
-            const buttonRow = new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId('apply_ocular')
-                    .setLabel('Apply to OCULAR')
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId('apply_friend')
-                    .setLabel('Apply as a Friend')
-                    .setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder()
-                    .setCustomId('diplomatic_inquiry')
-                    .setLabel('Diplomatic Inquiry')
-                    .setStyle(ButtonStyle.Success)
-            );
-      
-            // Send the welcome message with buttons and the generated image
-            await ocularPublicChannel.send({
-                embeds: [welcomeEmbed],
-                components: [buttonRow],
-                files: [{ attachment: outputPath, name: `welcomeImage_${member.id}.png` }] // Attach the generated image
-            });
-      
-            // Optionally, delete the image file after sending it (cleanup)
-            fs.unlinkSync(outputPath); // Remove the temporary image after sending
-        });
-      
-    } else {
-        console.error('Ocular Public channel not found!');
-    }
-    } catch (error) {
-      console.error('Error fetching the channel or sending the welcome message:', error);
-    }
-  });
-  
+client.on('guildMemberAdd', async (member) => {
+  const channelId = '1099496723086323712'; // Channel to send the welcome embed
 
+  try {
+    const ocularPublicChannel = await client.channels.fetch(channelId);
+
+    if (ocularPublicChannel) {
+      console.log('Found Ocular Public channel. Sending embed...');
+
+      const welcomeImagePath = path.join(__dirname, 'welcome.png');
+      const pfpUrl = member.user.displayAvatarURL({ format: 'png', size: 256 }); 
+
+      const welcomeImage = await loadImage(welcomeImagePath);
+
+      console.log('Profile Picture URL:', pfpUrl);
+
+    
+      try {
+        const response = await axios.head(pfpUrl); 
+        const contentType = response.headers['content-type'];
+        console.log('Profile Picture Content-Type:', contentType); 
+
+        if (!contentType.startsWith('image/')) {
+          console.error('The profile picture is not an image or is an unsupported type!');
+          return;
+        }
+      } catch (error) {
+        console.error('Error fetching profile picture headers:', error);
+        return;
+      }
+
+      let pfpImageBuffer;
+      try {
+        const pfpResponse = await axios.get(pfpUrl, { responseType: 'arraybuffer' });
+        pfpImageBuffer = await sharp(pfpResponse.data).png().toBuffer(); 
+      } catch (error) {
+        console.error('Error converting profile picture:', error);
+        return;
+      }
+
+   
+      let pfpImage;
+      try {
+        pfpImage = await loadImage(pfpImageBuffer); 
+      } catch (error) {
+        console.error('Error loading profile picture into canvas:', error);
+        return; 
+      }
+
+
+      const canvas = createCanvas(welcomeImage.width, welcomeImage.height);
+      const ctx = canvas.getContext('2d');
+
+      const pfpX = 689.5;
+      const pfpY = 22;
+      const pfpWidth = 256;
+      const pfpHeight = 256;
+      ctx.drawImage(pfpImage, pfpX, pfpY, pfpWidth, pfpHeight); 
+
+      ctx.drawImage(welcomeImage, 0, 0);
+
+      const outputPath = path.join(__dirname, `outputWelcomeImage_${member.id}.png`);
+
+      const out = fs.createWriteStream(outputPath);
+      const stream = canvas.createPNGStream();
+      stream.pipe(out);
+
+      out.on('finish', async () => {
+        const welcomeEmbed = new EmbedBuilder()
+          .setColor('#00FF00') 
+          .setTitle('Welcome to Ocular!')
+          .setDescription(`Welcome **${member.user.username}** to the OCULAR Community, a member of our **__Welcome Committee__** will be by to say hello shortly!`)
+          .setTimestamp()
+          .setImage(`attachment://welcomeImage_${member.id}.png`) 
+          .setFooter({ text: 'Enjoy your stay!' });
+
+        // Create the buttons
+        const buttonRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('apply_ocular')
+            .setLabel('Apply to OCULAR')
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId('apply_friend')
+            .setLabel('Apply as a Friend')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('diplomatic_inquiry')
+            .setLabel('Diplomatic Inquiry')
+            .setStyle(ButtonStyle.Success)
+        );
+
+        // Send the welcome message with buttons and the generated image
+        await ocularPublicChannel.send({
+          embeds: [welcomeEmbed],
+          components: [buttonRow],
+          files: [{ attachment: outputPath, name: `welcomeImage_${member.id}.png` }] // Attach the generated image
+        });
+
+        // Optionally, delete the image file after sending it (cleanup)
+        fs.unlinkSync(outputPath); // Remove the temporary image after sending
+      });
+
+    } else {
+      console.error('Ocular Public channel not found!');
+    }
+  } catch (error) {
+    console.error('Error fetching the channel or sending the welcome message:', error);
+  }
+});
+  
   // Handling button interactions
   client.on('interactionCreate', async (interaction) => {
     if (!interaction.isButton()) return; 
