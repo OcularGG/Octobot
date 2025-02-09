@@ -65,14 +65,15 @@ module.exports = async (client) => {
   const filter = (interaction) => interaction.customId === 'role_select' && interaction.isStringSelectMenu();
 
   client.on('interactionCreate', async (interaction) => {
+  try {
     if (filter(interaction)) {
       await interaction.deferUpdate();
 
       const member = await guild.members.fetch(interaction.user.id);
       const previousRoles = member.roles.cache.filter(role => role.id !== guild.id);
 
-      const rolesToAssign = interaction.values; 
-      
+      const rolesToAssign = interaction.values;
+
       // Fetch selected roles and filter out any undefined roles
       const selectedRoles = rolesToAssign
         .map(roleId => guild.roles.cache.get(roleId))
@@ -135,10 +136,18 @@ module.exports = async (client) => {
       console.log(`Removed roles: ${roleRemovedNames.join(', ')}`);
 
       // Inform the user about the roles that were added and removed
-      await interaction.followUp({
-        content: `You have been assigned the roles: ${roleAddedNames.join(', ')}. You have removed the roles: ${roleRemovedNames.join(', ')}.`,
-        ephemeral: true,
-      });
+      try {
+        await interaction.editReply({
+          content: `You have been assigned the roles: ${roleAddedNames.join(', ')}. You have removed the roles: ${roleRemovedNames.join(', ')}.`,
+          ephemeral: true,
+        });
+      } catch (error) {
+        console.error(`Error editing reply: ${error.message}`);
+      }
     }
-  });
+  } catch (error) {
+    console.error(`Error handling interaction: ${error.message}`);
+  }
+});
+
 };

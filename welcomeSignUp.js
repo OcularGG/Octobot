@@ -247,151 +247,158 @@ client.on('guildMemberAdd', async (member) => {
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 
 if (interaction.customId === 'modal_apply_ocular') {
-    // Get the answers from the modal
-    const characterName = interaction.fields.getTextInputValue('character_name');
-    const activeTimes = interaction.fields.getTextInputValue('active_times');
-    const pastGuilds = interaction.fields.getTextInputValue('past_guilds');
-    const contentType = interaction.fields.getTextInputValue('content_type');
-    const vouchMember = interaction.fields.getTextInputValue('vouch_member');
-  
-    const username = interaction.user.username;
-  
-    try {
-      const parentChannel = await interaction.guild.channels.fetch('1301595825469919273');
-      const channel = await interaction.guild.channels.create({
-        name: `OCL-${username}`,
-        type: 0,
-        parent: parentChannel.id,
-        reason: 'OCL application channel',
-      });
-  
-      // Store the applicant's ID in the channel's topic
-      await channel.setTopic(`Applicant ID: ${interaction.user.id}`);
-  
-      const embed = new EmbedBuilder()
-        .setColor('#0099FF')
-        .setTitle('Ocular Application Submission')
-        .addFields(
-          { name: 'Character Name', value: characterName, inline: true },
-          { name: 'Active Times', value: activeTimes, inline: true },
-          { name: 'Past Guilds', value: pastGuilds, inline: true },
-          { name: 'Roads or BZ?', value: contentType, inline: true },
-          { name: 'Can a member vouch for you?', value: vouchMember, inline: true }
-        )
-        .setTimestamp()
-        .setFooter({ text: 'Ocular Application' });
-  
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('accept_ocl').setLabel('Accept OCL').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('accept_uni').setLabel('Accept Uni').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('decline').setLabel('Decline').setStyle(ButtonStyle.Danger),
-        new ButtonBuilder().setCustomId('deleteChannel2').setLabel('Delete Ticket').setStyle(ButtonStyle.Danger)
-      );
-  
-      const message = await channel.send({
-        embeds: [embed],
-        components: [row],
-      });
-  
-      const applicant = interaction.user;
-      await channel.permissionOverwrites.create(applicant.id, {
-        ViewChannel: true,
-        SendMessages: true,
-      });
-           //set nickname
-      await interaction.member.setNickname(characterName)
+  // Defer the reply to prevent timeout
+  await interaction.deferReply({ ephemeral: true });
+
+  // Get the answers from the modal
+  const characterName = interaction.fields.getTextInputValue('character_name');
+  const activeTimes = interaction.fields.getTextInputValue('active_times');
+  const pastGuilds = interaction.fields.getTextInputValue('past_guilds');
+  const contentType = interaction.fields.getTextInputValue('content_type');
+  const vouchMember = interaction.fields.getTextInputValue('vouch_member');
+
+  const username = interaction.user.username;
+
+  try {
+    const parentChannel = await interaction.guild.channels.fetch('1301595825469919273');
+    const channel = await interaction.guild.channels.create({
+      name: `OCL-${username}`,
+      type: 0,
+      parent: parentChannel.id,
+      reason: 'OCL application channel',
+    });
+
+    // Store the applicant's ID in the channel's topic
+    await channel.setTopic(`Applicant ID: ${interaction.user.id}`);
+
+    const embed = new EmbedBuilder()
+      .setColor('#0099FF')
+      .setTitle('Ocular Application Submission')
+      .addFields(
+        { name: 'Character Name', value: characterName, inline: true },
+        { name: 'Active Times', value: activeTimes, inline: true },
+        { name: 'Past Guilds', value: pastGuilds, inline: true },
+        { name: 'Roads or BZ?', value: contentType, inline: true },
+        { name: 'Can a member vouch for you?', value: vouchMember, inline: true }
+      )
+      .setTimestamp()
+      .setFooter({ text: 'Ocular Application' });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('accept_ocl').setLabel('Accept OCL').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('accept_uni').setLabel('Accept Uni').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('decline').setLabel('Decline').setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId('deleteChannel2').setLabel('Delete Ticket').setStyle(ButtonStyle.Danger)
+    );
+
+    const message = await channel.send({
+      embeds: [embed],
+      components: [row],
+    });
+
+    const applicant = interaction.user;
+    await channel.permissionOverwrites.create(applicant.id, {
+      ViewChannel: true,
+      SendMessages: true,
+    });
+
+    // Set nickname
+    await interaction.member.setNickname(characterName)
       .then(() => {
         console.log(`Nickname set to ${characterName}`);
       })
       .catch((error) => {
         console.error('Error setting nickname:', error);
       });
-  
-      await interaction.reply({
-        content: `Thank you for applying to Ocular! A custom channel has been created for your application: <#${channel.id}>`,
-        ephemeral: true,
-      });
-  
-    } catch (error) {
-      console.error('Error creating the channel or sending the message:', error);
-      await interaction.reply({
-        content: 'There was an error processing your application. Please try again later.',
-        ephemeral: true,
-      });
-    }
+
+    // Reply after all actions are completed
+    await interaction.editReply({
+      content: `Thank you for applying to Ocular! A custom channel has been created for your application: <#${channel.id}>`,
+    });
+
+  } catch (error) {
+    console.error('Error creating the channel or sending the message:', error);
+    await interaction.editReply({
+      content: 'There was an error processing your application. Please try again later.',
+    });
   }
+}
+
   
 
-  if (interaction.customId === 'modal_apply_friend') {
-    // Get the answers from the modal
-    const characterName = interaction.fields.getTextInputValue('character_name');
-    const vouchingMember = interaction.fields.getTextInputValue('vouching_member');
-    
-    // Get the username of the person who submitted the modal
-    const username = interaction.user.username;
-    
-    try {
-      // Fetch the parent channel where the new channel should be created
-      const parentChannel = await interaction.guild.channels.fetch('1301595825469919273'); // Channel ID to be the parent
-      
-      // Create a new channel with a unique name based on the user's username
-      const channel = await interaction.guild.channels.create({
-        name: `friend-${username}`,  // Channel name: #friend-<username>
-        type: 0,  // 'text' channel type
-        parent: parentChannel.id,  // Set the parent channel
-        reason: 'Friend application channel',
-      });
-  
-      // Set the topic after the channel has been created
-      await channel.setTopic(`Applicant ID: ${interaction.user.id}`);
-    
-      // Create the embed to send to the new channel
-      const embed = new EmbedBuilder()
-        .setColor('#0099FF')
-        .setTitle('Friendship Application Submission')
-        .addFields(
-          { name: 'Character Name', value: characterName, inline: true },
-          { name: 'Vouching Member', value: vouchingMember, inline: true }
-        )
-        .setTimestamp()
-        .setFooter({ text: 'Friendship Application' });
-  
-      // Create the "Vouched" and "Trusted" buttons
-      const vouchedButton = new ButtonBuilder()
-        .setCustomId('vouched')
-        .setLabel('Vouched')
-        .setStyle(ButtonStyle.Primary); // Blue button
-    
-      const trustedButton = new ButtonBuilder()
-        .setCustomId('trusted')
-        .setLabel('Trusted')
-        .setStyle(ButtonStyle.Success); // Green button
+if (interaction.customId === 'modal_apply_friend') {
+  // Defer the reply to prevent timeout
+  await interaction.deferReply({ ephemeral: true });
 
-      const deleteButton = new ButtonBuilder()
-        .setCustomId('deleteChannel')
-        .setLabel('Delete Ticket')
-        .setStyle(ButtonStyle.Danger); // Red button
-  
-      // Add the buttons to the action row
-      const actionRow = new ActionRowBuilder().addComponents(vouchedButton, trustedButton, deleteButton);
-    
-      // Send the embed and buttons to the newly created channel
-      await channel.send({
-        embeds: [embed],
-        components: [actionRow],
-      });
-    
-      // Ensure the applicant has access to the newly created channel
-      const applicant = interaction.user;
-    
-      // Allow the applicant to view the channel and send messages
-      await channel.permissionOverwrites.create(applicant.id, {
-        ViewChannel: true,
-        SendMessages: true,
-      });
+  // Get the answers from the modal
+  const characterName = interaction.fields.getTextInputValue('character_name');
+  const vouchingMember = interaction.fields.getTextInputValue('vouching_member');
 
-      //set nickname
-await interaction.member.setNickname(characterName)
+  // Get the username of the person who submitted the modal
+  const username = interaction.user.username;
+
+  try {
+    // Fetch the parent channel where the new channel should be created
+    const parentChannel = await interaction.guild.channels.fetch('1301595825469919273'); // Channel ID to be the parent
+
+    // Create a new channel with a unique name based on the user's username
+    const channel = await interaction.guild.channels.create({
+      name: `friend-${username}`,  // Channel name: #friend-<username>
+      type: 0,  // 'text' channel type
+      parent: parentChannel.id,  // Set the parent channel
+      reason: 'Friend application channel',
+    });
+
+    // Set the topic after the channel has been created
+    await channel.setTopic(`Applicant ID: ${interaction.user.id}`);
+
+    // Create the embed to send to the new channel
+    const embed = new EmbedBuilder()
+      .setColor('#0099FF')
+      .setTitle('Friendship Application Submission')
+      .addFields(
+        { name: 'Character Name', value: characterName, inline: true },
+        { name: 'Vouching Member', value: vouchingMember, inline: true }
+      )
+      .setTimestamp()
+      .setFooter({ text: 'Friendship Application' });
+
+    // Create the "Vouched" and "Trusted" buttons
+    const vouchedButton = new ButtonBuilder()
+      .setCustomId('vouched')
+      .setLabel('Vouched')
+      .setStyle(ButtonStyle.Primary); // Blue button
+
+    const trustedButton = new ButtonBuilder()
+      .setCustomId('trusted')
+      .setLabel('Trusted')
+      .setStyle(ButtonStyle.Success); // Green button
+
+    const deleteButton = new ButtonBuilder()
+      .setCustomId('deleteChannel')
+      .setLabel('Delete Ticket')
+      .setStyle(ButtonStyle.Danger); // Red button
+
+    // Add the buttons to the action row
+    const actionRow = new ActionRowBuilder().addComponents(vouchedButton, trustedButton, deleteButton);
+
+    // Send the embed and buttons to the newly created channel
+    await channel.send({
+      embeds: [embed],
+      components: [actionRow],
+    });
+
+    // Ensure the applicant has access to the newly created channel
+    const applicant = interaction.user;
+
+    // Allow the applicant to view the channel and send messages
+    await channel.permissionOverwrites.create(applicant.id, {
+      ViewChannel: true,
+      SendMessages: true,
+    });
+
+    // Set the nickname for the applicant
+    await interaction.member.setNickname(characterName)
       .then(() => {
         console.log(`Nickname set to ${characterName}`);
       })
@@ -399,72 +406,72 @@ await interaction.member.setNickname(characterName)
         console.error('Error setting nickname:', error);
       });
 
-      // Reply to the user that their submission has been processed
-      await interaction.reply({
-        content: `Thank you for applying to be a friend! A custom channel has been created for your application: <#${channel.id}>`,
-        ephemeral: true
-      });
-    
-    } catch (error) {
-      console.error('Error creating the channel or sending the message:', error);
-      await interaction.reply({
-        content: 'There was an error processing your application. Please try again later.',
-        ephemeral: true
-      });
-    }
+    // Reply after all actions are completed
+    await interaction.editReply({
+      content: `Thank you for applying to be a friend! A custom channel has been created for your application: <#${channel.id}>`,
+    });
+
+  } catch (error) {
+    console.error('Error creating the channel or sending the message:', error);
+    await interaction.editReply({
+      content: 'There was an error processing your application. Please try again later.',
+    });
   }
-  
-      
-      if (interaction.customId === 'modal_diplomatic_inquiry') {
-        // Get the answers from the modal
-        const characterName = interaction.fields.getTextInputValue('character_name');
-        const guildAlliance = interaction.fields.getTextInputValue('guild_alliance');
-        const authorityToSpeak = interaction.fields.getTextInputValue('authority_to_speak');
-        const discussionSubject = interaction.fields.getTextInputValue('discussion_subject');
-      
-      
-        // Get the username of the person who submitted the modal
-        const username = interaction.user.username;
-      
-        try {
-          // Fetch the parent channel where the new channel should be created
-          const parentChannel = await interaction.guild.channels.fetch('1301595825469919273'); // Channel ID to be the parent
-      
-          // Create a new channel with a unique name based on the user's username
-          const channel = await interaction.guild.channels.create({
-            name: `diplo-${username}`,  // Channel name: #friend-<username>
-            type: 0,  // 'text' channel type
-            parent: parentChannel.id,  // Set the parent channel
-            reason: 'Diplomatic application channel',
-          });
-      
-          // Create the embed to send to the new channel
-          const embed = new EmbedBuilder()
-            .setColor('#0099FF')
-            .setTitle('Diplomatic inquiry')
-            .addFields(
-              { name: 'Character Name:', value: characterName, inline: true },
-              { name: 'Guild or Alliance:', value: guildAlliance, inline: true },
-              { name: 'Authority to speak?:', value: authorityToSpeak, inline: true },
-              { name: 'Subject:', value: discussionSubject, inline: true }
-            )
-            .setTimestamp()
-            .setFooter({ text: 'Diplomatic Inquiry' });
-      
-          // Send the embed to the newly created channel
-          await channel.send({ embeds: [embed] });
-      
-          // Ensure the applicant has access to the newly created channel
-          const applicant = interaction.user;
-      
-          // Allow the applicant to view the channel and send messages
-          await channel.permissionOverwrites.create(applicant.id, {
-            ViewChannel: true,
-            SendMessages: true,
-          });
+}
 
-          //set nickname
-      await interaction.member.setNickname(characterName)
+      
+     if (interaction.customId === 'modal_diplomatic_inquiry') {
+  // Defer the reply to prevent timeout
+  await interaction.deferReply({ ephemeral: true });
+
+  // Get the answers from the modal
+  const characterName = interaction.fields.getTextInputValue('character_name');
+  const guildAlliance = interaction.fields.getTextInputValue('guild_alliance');
+  const authorityToSpeak = interaction.fields.getTextInputValue('authority_to_speak');
+  const discussionSubject = interaction.fields.getTextInputValue('discussion_subject');
+
+  // Get the username of the person who submitted the modal
+  const username = interaction.user.username;
+
+  try {
+    // Fetch the parent channel where the new channel should be created
+    const parentChannel = await interaction.guild.channels.fetch('1301595825469919273'); // Channel ID to be the parent
+
+    // Create a new channel with a unique name based on the user's username
+    const channel = await interaction.guild.channels.create({
+      name: `diplo-${username}`,  // Channel name: #diplo-<username>
+      type: 0,  // 'text' channel type
+      parent: parentChannel.id,  // Set the parent channel
+      reason: 'Diplomatic application channel',
+    });
+
+    // Create the embed to send to the new channel
+    const embed = new EmbedBuilder()
+      .setColor('#0099FF')
+      .setTitle('Diplomatic Inquiry')
+      .addFields(
+        { name: 'Character Name:', value: characterName, inline: true },
+        { name: 'Guild or Alliance:', value: guildAlliance, inline: true },
+        { name: 'Authority to speak?:', value: authorityToSpeak, inline: true },
+        { name: 'Subject:', value: discussionSubject, inline: true }
+      )
+      .setTimestamp()
+      .setFooter({ text: 'Diplomatic Inquiry' });
+
+    // Send the embed to the newly created channel
+    await channel.send({ embeds: [embed] });
+
+    // Ensure the applicant has access to the newly created channel
+    const applicant = interaction.user;
+
+    // Allow the applicant to view the channel and send messages
+    await channel.permissionOverwrites.create(applicant.id, {
+      ViewChannel: true,
+      SendMessages: true,
+    });
+
+    // Set the nickname for the applicant
+    await interaction.member.setNickname(characterName)
       .then(() => {
         console.log(`Nickname set to ${characterName}`);
       })
@@ -472,20 +479,19 @@ await interaction.member.setNickname(characterName)
         console.error('Error setting nickname:', error);
       });
 
-          // Reply to the user that their submission has been processed
-          await interaction.reply({
-            content: `Thank you for your diplomatic inquiry! A custom channel has been created for your inquiry: <#${channel.id}>`,
-            ephemeral: true
-          });
-      
-        } catch (error) {
-          console.error('Error creating the channel or sending the message:', error);
-          await interaction.reply({
-            content: 'There was an error processing your application. Please try again later.',
-            ephemeral: true
-          });
-        }
-      }
+    // Reply after all actions are completed
+    await interaction.editReply({
+      content: `Thank you for your diplomatic inquiry! A custom channel has been created for your inquiry: <#${channel.id}>`,
+    });
+
+  } catch (error) {
+    console.error('Error creating the channel or sending the message:', error);
+    await interaction.editReply({
+      content: 'There was an error processing your application. Please try again later.',
+    });
+  }
+}
+
           });
 
           client.on('interactionCreate', async (interaction) => {

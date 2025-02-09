@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Client, GatewayIntentBits,UserSelectMenuBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 
 module.exports = {
     data: null,  // Not necessary unless you want a specific command trigger
@@ -17,16 +17,24 @@ module.exports = {
                 type: ChannelType.GuildVoice,
                 parent: mainChannel.parent,
                 userLimit: 0,
-                permissionOverwrites: [
-                    {
-                        id: guild.id, // Everyone
-                        deny: [PermissionFlagsBits.Connect],
-                    },
-                    {
-                        id: member.id, // Channel owner
-                        allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles],
-                    },
-                ],
+                    permissionOverwrites: [
+                         {
+                                id: guild.id, // Everyone
+                                deny: [PermissionFlagsBits.Connect], // Deny everyone from connecting by default
+                         },
+                         {
+                                id: member.id, // Channel owner
+                                allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles],
+                         },
+                         {
+                                id: '1336395193980817458', 
+                                allow: [PermissionFlagsBits.Connect],
+                         },
+                         {
+                                id: '1336395194995834971',
+                                allow: [PermissionFlagsBits.Connect],
+                         },
+        ],
             });
 
             await member.voice.setChannel(tempChannel);  // Move user to new channel
@@ -79,55 +87,71 @@ module.exports = {
         });
 
         // Handle interactions with select menus
-        client.on('interactionCreate', async (interaction) => {
-            if (!interaction.isStringSelectMenu()) return;
+       client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isStringSelectMenu()) return;
 
-            const { customId, values, member, channel } = interaction;
-            const userId = member.id;
+    const { customId, values, member, channel } = interaction;
+    const userId = member.id;
 
-            // Check if the user is the owner of the channel
-            const channelData = createdVoiceChannels.get(channel.id);
-            if (!channelData || channelData.ownerId !== userId) {
-                return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
-            }
+    // Handle changes based on the selected menu
+    if (customId === 'change_channel_settings') {
+        // Check if the user is the owner of the channel inside this block
+        const channelData = createdVoiceChannels.get(channel.id);
+        if (!channelData || channelData.ownerId !== userId) {
+            return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
+        }
 
-            // Handle changes based on the selected menu
-            if (customId === 'change_channel_settings') {
-                if (values[0] === 'name') {
-                    await showNameChangeModal(interaction);
-                } else if (values[0] === 'limit') {
-                    await showLimitChangeModal(interaction);
-                }
-            } else if (customId === 'change_permissions') {
-                await handlePermissionsChange(interaction, values[0], channel, member.guild);
-            }
-        });
+        if (values[0] === 'name') {
+            await showNameChangeModal(interaction);
+        } else if (values[0] === 'limit') {
+            await showLimitChangeModal(interaction);
+        }
+
+    } else if (customId === 'change_permissions') {
+        // Check if the user is the owner of the channel inside this block as well
+        const channelData = createdVoiceChannels.get(channel.id);
+        if (!channelData || channelData.ownerId !== userId) {
+            return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
+        }
+
+        await handlePermissionsChange(interaction, values[0], channel, member.guild);
+    }
+});
 
         // Handle modal interactions for name and limit
-        client.on('interactionCreate', async (interaction) => {
-            if (!interaction.isModalSubmit()) return;
+       client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isModalSubmit()) return;
 
-            const { customId, fields, member, channel } = interaction;
-            const userId = member.id;
-            const channelData = createdVoiceChannels.get(channel.id);
+    const { customId, fields, member, channel } = interaction;
+    const userId = member.id;
 
-            if (!channelData || channelData.ownerId !== userId) {
-                return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
-            }
+    if (customId === 'name_modal') {
+        // Check if the user is the owner of the channel inside this block
+        const channelData = createdVoiceChannels.get(channel.id);
+        if (!channelData || channelData.ownerId !== userId) {
+            return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
+        }
 
-            if (customId === 'name_modal') {
-                const newName = fields.getTextInputValue('new_name');
-                await channel.setName(newName);
-                await interaction.reply(`The channel name has been updated to: ${newName}`, { flags: 64 });
-            } else if (customId === 'limit_modal') {
-                const newLimit = parseInt(fields.getTextInputValue('new_limit'));
-                if (isNaN(newLimit) || newLimit < 0) {
-                    return interaction.reply({ content: 'Please provide a valid number for the user limit.', flags: 64 });
-                }
-                await channel.setUserLimit(newLimit);
-                await interaction.reply(`The user limit has been updated to: ${newLimit}`, { flags: 64 });
-            }
-        });
+        const newName = fields.getTextInputValue('new_name');
+        await channel.setName(newName);
+        await interaction.reply(`The channel name has been updated to: ${newName}`, { flags: 64 });
+
+    } else if (customId === 'limit_modal') {
+        // Check if the user is the owner of the channel inside this block as well
+        const channelData = createdVoiceChannels.get(channel.id);
+        if (!channelData || channelData.ownerId !== userId) {
+            return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
+        }
+
+        const newLimit = parseInt(fields.getTextInputValue('new_limit'));
+        if (isNaN(newLimit) || newLimit < 0) {
+            return interaction.reply({ content: 'Please provide a valid number for the user limit.', flags: 64 });
+        }
+        await channel.setUserLimit(newLimit);
+        await interaction.reply(`The user limit has been updated to: ${newLimit}`, { flags: 64 });
+    }
+});
+
 
         // Permissions change handler
         async function handlePermissionsChange(interaction, action, channel, guild) {
@@ -142,17 +166,12 @@ module.exports = {
                     break;
                 case 'permit':
                     const members = await guild.members.fetch();
-                    const memberOptions = members.map(member => ({
-                        label: member.user.username,
-                        value: member.id,
-                    }));
 
-                    const selectMenu = new StringSelectMenuBuilder()
+                     const selectMenu = new UserSelectMenuBuilder()
                         .setCustomId('select_permitted_member')
                         .setPlaceholder('Select a member to permit:')
-                        .addOptions(memberOptions)
-                        .setMinValues(1)
-                        .setMaxValues(1);  // We can limit to only 1 selection for now
+                        .setMinValues(1)  // Allow at least one selection
+                        .setMaxValues(1);  // Limit to 1 selection
 
                     const row = new ActionRowBuilder().addComponents(selectMenu);
                     await interaction.reply({ content: 'Select a member to permit to the channel:', components: [row] });
@@ -162,23 +181,23 @@ module.exports = {
 
         // Handle the response to the "permit" dropdown
         client.on('interactionCreate', async (interaction) => {
-            if (!interaction.isStringSelectMenu()) return;
+        // Check that the interaction is a User Select Menu
+         if (!interaction.isUserSelectMenu()) return;
 
-            if (interaction.customId === 'select_permitted_member') {
-                const memberId = interaction.values[0];
-                const member = await interaction.guild.members.fetch(memberId);
-                const channelData = createdVoiceChannels.get(interaction.channel.id);
+        if (interaction.customId === 'select_permitted_member') {
+        const memberId = interaction.values[0]; // The selected user's ID from the dropdown
+        const member = await interaction.guild.members.fetch(memberId);
+        const channelData = createdVoiceChannels.get(interaction.channel.id);
 
-                if (!channelData || channelData.ownerId !== interaction.member.id) {
-                    return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
-                }
+        if (!channelData || channelData.ownerId !== interaction.member.id) {
+            return interaction.reply({ content: 'You are not the owner of this channel.', flags: 64 });
+        }
 
-                // Update the selected member's permission to connect to the channel
-                await interaction.channel.permissionOverwrites.edit(memberId, { CONNECT: PermissionFlagsBits.Allow });
-                await interaction.reply({ content: `${member.user.username} has been permitted to join the channel.` });
-            }
+        // Update the selected member's permission to connect to the channel
+        await interaction.channel.permissionOverwrites.edit(memberId, { CONNECT: PermissionFlagsBits.Allow });
+        await interaction.reply({ content: `${member.user.username} has been permitted to join the channel.` });
+        }
         });
-
         // Modal for changing channel name
         async function showNameChangeModal(interaction) {
             const modal = new ModalBuilder()
@@ -219,12 +238,27 @@ module.exports = {
         // Clean up empty channels
         setInterval(async () => {
             for (const [channelId, data] of createdVoiceChannels.entries()) {
-                const channel = await client.channels.fetch(channelId);
-                if (channel.members.size === 0) {
-                    await channel.delete();
-                    createdVoiceChannels.delete(channelId);  // Clean up map
+                try {
+                    // Attempt to fetch the channel
+                    const channel = await client.channels.fetch(channelId);
+                    
+                    // Check if the channel has no members
+                    if (channel.members.size === 0) {
+                        // Delete the channel if it's empty
+                        await channel.delete();
+                        
+                        // Clean up the map
+                        createdVoiceChannels.delete(channelId);
+                    }
+                } catch (error) {
+                    // Generic error handling
+                    console.error(`Error handling channel ${channelId}:`, error);
+                    
+                    // Optionally, remove the invalid channel from the map
+                    createdVoiceChannels.delete(channelId);
                 }
             }
-        }, 30000);  // Check every 30 seconds
+        }, 1000);  // Check every second
+        
     }
 };
