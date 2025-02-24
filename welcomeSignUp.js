@@ -248,7 +248,7 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('
 
 if (interaction.customId === 'modal_apply_ocular') {
   // Defer the reply to prevent timeout
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: 64 });
 
   // Get the answers from the modal
   const characterName = interaction.fields.getTextInputValue('character_name');
@@ -328,7 +328,7 @@ if (interaction.customId === 'modal_apply_ocular') {
 
 if (interaction.customId === 'modal_apply_friend') {
   // Defer the reply to prevent timeout
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: 64 });
 
   // Get the answers from the modal
   const characterName = interaction.fields.getTextInputValue('character_name');
@@ -422,7 +422,7 @@ if (interaction.customId === 'modal_apply_friend') {
       
      if (interaction.customId === 'modal_diplomatic_inquiry') {
   // Defer the reply to prevent timeout
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: 64 });
 
   // Get the answers from the modal
   const characterName = interaction.fields.getTextInputValue('character_name');
@@ -499,14 +499,15 @@ if (interaction.customId === 'modal_apply_friend') {
             //Friend APP button logic
 
             if (interaction.customId === 'deleteChannel') {
+                    await interaction.deferReply({ flags: 64 });
               // Check if the member has Administrator permission or a specific role
               const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
               
               if (!hasPermission) {
                   // If the user doesn't have permission, send a message informing them
-                  await interaction.reply({
+                  await interaction.editReply({
                       content: 'You do not have permission to delete this channel.',
-                      ephemeral: true, // Make this message visible only to the user
+                      flags: 64, // Make this message visible only to the user
                   });
                   return; // Exit the function to prevent the channel from being deleted
               }
@@ -524,14 +525,15 @@ if (interaction.customId === 'modal_apply_friend') {
           }
             
             if (interaction.customId === 'deleteChannel2') {
+              await interaction.deferReply({ flags: 64 });
               // Check if the member has Administrator permission or a specific role
               const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
               
               if (!hasPermission) {
                   // If the user doesn't have permission, send a message informing them
-                  await interaction.reply({
+                  await interaction.editReply({
                       content: 'You do not have permission to delete this channel.',
-                      ephemeral: true, // Make this message visible only to the user
+                      flags: 64, // Make this message visible only to the user
                   });
                   return; // Exit the function to prevent the channel from being deleted
               }
@@ -549,12 +551,13 @@ if (interaction.customId === 'modal_apply_friend') {
           }
 
           if (interaction.customId === 'vouched') {
+            await interaction.deferReply({ flags: 64 });
             // Check if the user has the required permission first
             const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
             if (!hasPermission) {
-                return interaction.reply({
+                return interaction.editReply({
                     content: 'You do not have permission to use this button.',
-                    ephemeral: true,
+                    flags: 64,
                 });
             }
         
@@ -565,9 +568,9 @@ if (interaction.customId === 'modal_apply_friend') {
           
             // Ensure that applicantId is present
             if (!applicantId) {
-              return interaction.reply({
+              return interaction.editReply({
                 content: 'Could not find the applicant ID in the channel topic.',
-                ephemeral: true,
+                flags: 64,
               });
             }
           
@@ -576,9 +579,9 @@ if (interaction.customId === 'modal_apply_friend') {
             try {
               applicant = await interaction.guild.members.fetch(applicantId);
             } catch (error) {
-              return interaction.reply({
+              return interaction.editReply({
                 content: 'Could not find the applicant member in the guild.',
-                ephemeral: true,
+                flags: 64,
               });
             }
         
@@ -592,15 +595,15 @@ if (interaction.customId === 'modal_apply_friend') {
                   console.log(`Applicant's nickname changed to: ${newNickname}`);
               } catch (error) {
                   console.error('Error setting nickname:', error);
-                  return interaction.reply({
+                  return interaction.editReply({
                       content: 'There was an error setting the applicant\'s nickname.',
-                      ephemeral: true,
+                      flags: 64,
                   });
               }
           } else {
-              return interaction.reply({
+              return interaction.editReply({
                   content: 'Applicant does not have a nickname set, cannot modify it.',
-                  ephemeral: true,
+                  flags: 64,
               });
           }
         
@@ -609,29 +612,30 @@ if (interaction.customId === 'modal_apply_friend') {
               const role = await interaction.guild.roles.cache.get('1336395198904799355');
           
               if (!role) {
-                return interaction.reply({
+                return interaction.editReply({
                   content: 'The role could not be found.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           
               // Add the 'vouched' role to the applicant
               await applicant.roles.add(role);
           
-              return interaction.reply({
+              return interaction.editReply({
                 content: `The applicant has been successfully vouched and given the role: ${role.name}`,
-                ephemeral: true,
+                flags: 64,
               });
             } catch (error) {
               console.error('Error assigning role:', error);
-              return interaction.reply({
+              return interaction.editReply({
                 content: 'There was an error assigning the role to the applicant. Please try again later.',
-                ephemeral: true,
+                flags: 64,
               });
             }
         }
         
             if (interaction.customId === 'trusted') {
+                await interaction.deferReply({ flags: 64 });
                 // Fetch the applicant's member from the guild
                 const channel = interaction.channel;
                 const topic = channel.topic;
@@ -640,9 +644,9 @@ if (interaction.customId === 'modal_apply_friend') {
                 const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
             
                 if (!hasPermission) {
-                    return interaction.reply({
+                    return interaction.editReply({
                         content: 'You do not have permission to use this button.',
-                        ephemeral: true,
+                        flags: 64,
                     });
                 }
             if (applicant.nickname) {
@@ -655,15 +659,15 @@ if (interaction.customId === 'modal_apply_friend') {
                     console.log(`Applicant's nickname changed to: ${newNickname}`);
                 } catch (error) {
                     console.error('Error setting nickname:', error);
-                    return interaction.reply({
+                    return interaction.editReply({
                         content: 'There was an error setting the applicant\'s nickname.',
-                        ephemeral: true,
+                        flags: 64,
                     });
                 }
             } else {
-                return interaction.reply({
+                return interaction.editReply({
                     content: 'Applicant does not have a nickname set, cannot modify it.',
-                    ephemeral: true,
+                    flags: 64,
                 });
             }
             
@@ -672,42 +676,43 @@ if (interaction.customId === 'modal_apply_friend') {
                     const role = await interaction.guild.roles.cache.get('1336395197730521133');
                     if (role) {
                         await applicant.roles.add(role);
-                        return interaction.reply({
+                        return interaction.editReply({
                             content: `The applicant has been successfully confirmed as trusted and given the role: ${role.name}`,
-                            ephemeral: true,
+                            flags: 64,
                         });
                     } else {
-                        return interaction.reply({
+                        return interaction.editReply({
                             content: 'The role could not be found.',
-                            ephemeral: true,
+                            flags: 64,
                         });
                     }
                 } catch (error) {
                     console.error('Error assigning role:', error);
-                    return interaction.reply({
+                    return interaction.editReply({
                         content: 'There was an error assigning the role to the applicant. Please try again later.',
-                        ephemeral: true,
+                        flags: 64,
                     });
                 }
             }
             //Ocular APP button logic
             if (interaction.customId === 'accept_ocl') {
+                await interaction.deferReply({ flags: 64 });
                 const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
                 const channel = interaction.channel;
               const topic = channel.topic;
               const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
 
               if (!hasPermission) {
-                return interaction.reply({
+                return interaction.editReply({
                   content: 'You do not have permission to use this button.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           
               if (!applicantId) {
-                return interaction.reply({
+                return interaction.editReply({
                   content: 'Could not find applicant information.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           
@@ -723,15 +728,15 @@ if (interaction.customId === 'modal_apply_friend') {
                     console.log(`Applicant's nickname changed to: ${newNickname}`);
                 } catch (error) {
                     console.error('Error setting nickname:', error);
-                    return interaction.reply({
+                    return interaction.editReply({
                         content: 'There was an error setting the applicant\'s nickname.',
-                        ephemeral: true,
+                        flags: 64,
                     });
                 }
             } else {
-                return interaction.reply({
+                return interaction.editReply({
                     content: 'Applicant does not have a nickname set, cannot modify it.',
-                    ephemeral: true,
+                    flags: 64,
                 });
               }
               
@@ -743,9 +748,9 @@ if (interaction.customId === 'modal_apply_friend') {
               if (oclRole && portalerRole) {
                 await applicant.roles.add([oclRole, portalerRole]);
               } else {
-                return interaction.reply({
+                return interaction.editReply({
                   content: 'Could not assign roles, please check the role IDs.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           
@@ -753,29 +758,30 @@ if (interaction.customId === 'modal_apply_friend') {
                 content: `${applicant.user}, your application has been accepted to Ocular! Welcome to the guild!`,
               });
           
-              await interaction.reply({
+              await interaction.editReply({
                 content: 'The acceptance message has been sent, and roles have been assigned.',
-                ephemeral: true,
+                flags: 64,
               });
             }
           //Uni APP button logic
             if (interaction.customId === 'accept_uni') {
+                    await interaction.deferReply({ flags: 64 });
                 const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
                 const channel = interaction.channel;
               const topic = channel.topic;
               const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
 
               if (!hasPermission) {
-                return interaction.reply({
+                return interaction.editReply({
                   content: 'You do not have permission to use this button.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           
               if (!applicantId) {
-                return interaction.reply({
+                return interaction.editReply({
                   content: 'Could not find applicant information.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           
@@ -791,15 +797,15 @@ if (interaction.customId === 'modal_apply_friend') {
                     console.log(`Applicant's nickname changed to: ${newNickname}`);
                 } catch (error) {
                     console.error('Error setting nickname:', error);
-                    return interaction.reply({
+                    return interaction.editReply({
                         content: 'There was an error setting the applicant\'s nickname.',
-                        ephemeral: true,
+                        flags: 64,
                     });
                 }
             } else {
-                return interaction.reply({
+                return interaction.editReply({
                     content: 'Applicant does not have a nickname set, cannot modify it.',
-                    ephemeral: true,
+                    flags: 64,
                 });
             }
               // Assign roles for 'accept_uni'
@@ -809,9 +815,9 @@ if (interaction.customId === 'modal_apply_friend') {
               if (uniRole && portalerRole) {
                 await applicant.roles.add([uniRole, portalerRole]);
               } else {
-                return interaction.reply({
+                return interaction.editReply({
                   content: 'Could not assign roles, please check the role IDs.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           
@@ -819,9 +825,9 @@ if (interaction.customId === 'modal_apply_friend') {
                 content: `${applicant.user}, your application has been accepted to Uni! Welcome to the guild!`,
               });
           
-              await interaction.reply({
+              await interaction.editReply({
                 content: 'The acceptance message has been sent, and roles have been assigned.',
-                ephemeral: true,
+                flags: 64,
               });
             }
           //Decline button logic
@@ -829,9 +835,9 @@ if (interaction.customId === 'modal_apply_friend') {
                 const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
 
               if (!hasPermission) {
-                return interaction.reply({
+                return interaction.Reply({
                   content: 'You do not have permission to use this button.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               } 
               const modal = new ModalBuilder()
@@ -855,15 +861,16 @@ if (interaction.customId === 'modal_apply_friend') {
             if (!interaction.isModalSubmit()) return;
 
             if (interaction.customId === 'decline_reason_modal') {
+                    await interaction.deferReply({ flags: 64 });
                 const reason = interaction.fields.getTextInputValue('decline_reason_input');
                 const channel = interaction.channel;
                 const topic = channel.topic;
                 const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
               
                 if (!applicantId) {
-                  return interaction.reply({
+                  return interaction.editReply({
                     content: 'Could not find applicant information.',
-                    ephemeral: true,
+                    flags: 64,
                   });
                 }
               
@@ -873,9 +880,9 @@ if (interaction.customId === 'modal_apply_friend') {
                   content: `${applicant.user}, your application has been declined. Reason: ${reason}`,
                 });
               
-                await interaction.reply({
+                await interaction.editReply({
                   content: 'The decline reason has been submitted.',
-                  ephemeral: true,
+                  flags: 64,
                 });
               }
           });

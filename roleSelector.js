@@ -7,28 +7,16 @@ module.exports = async (client) => {
   const channel = await guild.channels.fetch(channelId);
 
   const rolesList = [
-    { name: 'Important ', id: '1336458718916776100' },
-    { name: 'BZ PvP', id: '1336458731604541541' },
-    { name: 'Roads/Small Scale PvP', id: '1336458726181310557' },
-    { name: 'UNI PvP', id: '1304110177703825499' },
-    { name: 'Roads PvE', id: '1336460629531430995' },
-    { name: 'BZ PvE', id: '1336460685881774314' },
-    { name: 'UNI PvE', id: '1336458729930883125' },
-    { name: 'Ava Skip', id: '1336458732661506059' },
-    { name: 'Ava Dungeon', id: '1336459316559085578' },
-    { name: 'BZ Power Core/Vortex', id: '1336458727712100382' },
-    { name: 'Roads Power Core', id: '1336458729138163712' },
-    { name: 'Blue-Yellow HO Route', id: '1336458728320270376 ' }, // Extra space here
-    { name: '2v2 HGs', id: '1336459317234237460' },
-    { name: '5v5 HGs', id: '1336459318173892709' },
-    { name: '10v10 HGs', id: '1336459318425554999' },
-    { name: 'Crystal Arena/League', id: '1336459481097437184' },
-    { name: 'Fame Farm', id: '1336459483106508862' },
-    { name: 'Faction/Bandit', id: '1336459483605372949' },
-    { name: 'Castle/OPs', id: '1336459548596240438' },
-    { name: 'Ratting', id: '1336459549250424863' },
-    { name: 'Scrimmage', id: '1336459549682700402' },
-    { name: 'Community Event', id: '1336459738619183165' }
+    { name: 'PvP - Black Zone ', id: '1336458731604541541' },
+    { name: 'PvP - Brecil & Roads', id: '1336458726181310557' },
+    { name: 'PvP - Hellgates', id: '1336459318173892709' },
+    { name: 'PvP - Arenas', id: '1336459481097437184' },
+    { name: 'PvE - Roads', id: '1336460629531430995' },
+    { name: 'PvE - Static Dungeons', id: '1336460685881774314' },
+    { name: 'PvE - Group Dungeons', id: '1336458729930883125' },
+    { name: 'PvE - Ava Raids', id: '1336459316559085578' },
+    { name: 'Objective - Delta', id: '1336458727712100382' },
+    { name: 'Objective - SIV', id: '1336458729138163712' }
   ];
 
   // Trim the role IDs to remove any spaces
@@ -67,7 +55,7 @@ module.exports = async (client) => {
   client.on('interactionCreate', async (interaction) => {
   try {
     if (filter(interaction)) {
-      await interaction.deferUpdate();
+      await interaction.deferReply({flags: 64});
 
       const member = await guild.members.fetch(interaction.user.id);
       const previousRoles = member.roles.cache.filter(role => role.id !== guild.id);
@@ -139,7 +127,7 @@ module.exports = async (client) => {
       try {
         await interaction.editReply({
           content: `You have been assigned the roles: ${roleAddedNames.join(', ')}. You have removed the roles: ${roleRemovedNames.join(', ')}.`,
-          ephemeral: true,
+          flags: 64,
         });
       } catch (error) {
         console.error(`Error editing reply: ${error.message}`);

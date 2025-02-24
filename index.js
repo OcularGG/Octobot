@@ -12,13 +12,13 @@ const voiceChannel = require('./voiceChannel'); //path to voiceChannel.js
 // Create a new client instance
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.Guilds,
   ],
 });
 
