@@ -718,6 +718,13 @@ if (interaction.customId === 'modal_apply_friend') {
           
               const applicant = await interaction.guild.members.fetch(applicantId);
 
+              try {
+                await applicant.send("🎉 Congratulations and Welcome to the Ocular Family! 🎉 Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
+                console.log(`DM sent to ${applicant.user.tag}`);
+              } catch (error) {
+                console.error('Error sending DM:', error);
+              }
+
               if (applicant.nickname) {
                 // Add "[OCL]" in front of the applicant's current nickname
                 const newNickname = `[OCL] ${applicant.nickname}`;
@@ -787,6 +794,13 @@ if (interaction.customId === 'modal_apply_friend') {
           
               const applicant = await interaction.guild.members.fetch(applicantId);
 
+              try {
+                await applicant.send("🎉 Congratulations and Welcome to the Ocular Family! 🎉 Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
+                console.log(`DM sent to ${applicant.user.tag}`);
+              } catch (error) {
+                console.error('Error sending DM:', error);
+              }
+              
               if (applicant.nickname) {
                 // Add "[OCLU]" in front of the applicant's current nickname
                 const newNickname = `[OCLU] ${applicant.nickname}`;
