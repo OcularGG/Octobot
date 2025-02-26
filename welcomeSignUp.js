@@ -339,7 +339,7 @@ if (interaction.customId === 'modal_apply_friend') {
 
   try {
     // Fetch the parent channel where the new channel should be created
-    const parentChannel = await interaction.guild.channels.fetch('1301595825469919273'); // Channel ID to be the parent
+    const parentChannel = await interaction.guild.channels.fetch('1336428801994915870'); // Channel ID to be the parent
 
     // Create a new channel with a unique name based on the user's username
     const channel = await interaction.guild.channels.create({
@@ -435,7 +435,7 @@ if (interaction.customId === 'modal_apply_friend') {
 
   try {
     // Fetch the parent channel where the new channel should be created
-    const parentChannel = await interaction.guild.channels.fetch('1301595825469919273'); // Channel ID to be the parent
+    const parentChannel = await interaction.guild.channels.fetch('1336428874191474769'); // Channel ID to be the parent
 
     // Create a new channel with a unique name based on the user's username
     const channel = await interaction.guild.channels.create({
