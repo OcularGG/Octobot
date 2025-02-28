@@ -8,7 +8,8 @@ const logRoleHierarchy = require('./logRoleHierarchy'); // Path to logRoleHierar
 const autoReaction = require('./autoReaction'); // Path to autoReaction.js
 const initializeWelcome = require('./welcomeSignUp'); //path to welcomeSignUp.js
 const voiceChannel = require('./voiceChannel'); //path to voiceChannel.js
-
+const transferLogic = require('./transferLogic'); //path to transferLogic.js
+const feedbackThreading = require('./feedbackThreading'); // Path to feedbackThreading.js
 // Create a new client instance
 const client = new Client({
   intents: [
@@ -59,7 +60,7 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Call the roleSelector function to send the role selection embed
-  roleSelector(client);
+  //roleSelector(client);
 
   // Log the role hierarchy when the bot is ready
   //logRoleHierarchy(client);
@@ -67,8 +68,14 @@ client.on('ready', () => {
   // Call the autoReaction function to add reactions to messages in specific channels
 autoReaction(client);
 
+// Call the feedbackThreading function to create threads for messages in a specific channel
+feedbackThreading(client);
+
 //call the initializeWelcome function to send a welcome message to new members
 initializeWelcome(client);
+
+//call the transferLogic function to send a transfer embed
+transferLogic(client);
 
 //call the voiceChannel function to create a voice channel
 voiceChannel.startVoiceChannel(client)
