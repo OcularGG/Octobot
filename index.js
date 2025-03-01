@@ -1,5 +1,4 @@
-//INDEX.JS UPDATED
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 const { token, clientId, guildId } = require('./config.json');
 const fs = require('fs');
 const path = require('path');
@@ -10,6 +9,7 @@ const initializeWelcome = require('./welcomeSignUp'); //path to welcomeSignUp.js
 const voiceChannel = require('./voiceChannel'); //path to voiceChannel.js
 const transferLogic = require('./transferLogic'); //path to transferLogic.js
 const feedbackThreading = require('./feedbackThreading'); // Path to feedbackThreading.js
+
 // Create a new client instance
 const client = new Client({
   intents: [
@@ -23,15 +23,16 @@ const client = new Client({
   ],
 });
 
-client.commands = new Collection();
-
-// Load commands dynamically from the "commands" folder
+// Commands array to hold the loaded commands
+const commands = [];
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
+// Load each command into the commands array
 for (const file of commandFiles) {
-  const command = require(path.join(commandsPath, file));
-  client.commands.set(command.data.name, command);
+  const filePath = path.join(commandsPath, file);
+  const command = require(filePath);
+  commands.push(command);  // Store command in the array instead of client.commands
 }
 
 // Command registration
@@ -46,7 +47,7 @@ const rest = new REST({ version: '9' }).setToken(token);
     // Register commands for a specific guild
     await rest.put(
       Routes.applicationGuildCommands(clientId, guildId),
-      { body: client.commands.map(command => command.data.toJSON()) },
+      { body: commands.map(command => command.data.toJSON()) }, // Register all commands from the commands array
     );
 
     console.log('Successfully reloaded application (/) commands.');
@@ -66,23 +67,38 @@ client.on('ready', () => {
   //logRoleHierarchy(client);
 
   // Call the autoReaction function to add reactions to messages in specific channels
-autoReaction(client);
+  autoReaction(client);
 
-// Call the feedbackThreading function to create threads for messages in a specific channel
-feedbackThreading(client);
+  // Call the feedbackThreading function to create threads for messages in a specific channel
+  feedbackThreading(client);
 
-//call the initializeWelcome function to send a welcome message to new members
-initializeWelcome(client);
+  // Call the initializeWelcome function to send a welcome message to new members
+  initializeWelcome(client);
 
-//call the transferLogic function to send a transfer embed
-transferLogic(client);
+  // Call the transferLogic function to send a transfer embed
+  transferLogic(client);
 
-//call the voiceChannel function to create a voice channel
-voiceChannel.startVoiceChannel(client)
+  // Call the voiceChannel function to create a voice channel
+  voiceChannel.startVoiceChannel(client);
 });
 
+// Handle interaction events (like slash commands)
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
 
+  // Find the command in the commands array
+  const command = commands.find(cmd => cmd.data.name === interaction.commandName);
+  if (!command) return;
 
+  try {
+    // Execute the command
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    // Send an error message if the command execution fails
+    await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true });
+  }
+});
 
 // Log in to Discord with the app's token
 client.login(token);
