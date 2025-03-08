@@ -4,12 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const roleSelector = require('./roleSelector'); // Path to roleSelector.js
 const logRoleHierarchy = require('./logRoleHierarchy'); // Path to logRoleHierarchy.js
-const autoReaction = require('./autoReaction'); // Path to autoReaction.js
 const initializeWelcome = require('./welcomeSignUp'); //path to welcomeSignUp.js
 const voiceChannel = require('./voiceChannel'); //path to voiceChannel.js
 const transferLogic = require('./transferLogic'); //path to transferLogic.js
-const feedbackThreading = require('./feedbackThreading'); // Path to feedbackThreading.js
-
+const feedbackAndReactions = require('./feedbackAndReactions'); // Path to feedbackAndReactions.js
+const mammothWarning = require('./mammothWarning'); // Path to mammothWarning.js
 // Create a new client instance
 const client = new Client({
   intents: [
@@ -61,16 +60,16 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Call the roleSelector function to send the role selection embed
-  //roleSelector(client);
+  roleSelector(client);
 
   // Log the role hierarchy when the bot is ready
   //logRoleHierarchy(client);
 
-  // Call the autoReaction function to add reactions to messages in specific channels
-  autoReaction(client);
-
+  // Call the mammothWarning function to send a warning message
+  mammothWarning(client);
+  
   // Call the feedbackThreading function to create threads for messages in a specific channel
-  feedbackThreading(client);
+  feedbackAndReactions(client);
 
   // Call the initializeWelcome function to send a welcome message to new members
   initializeWelcome(client);
