@@ -181,7 +181,6 @@ module.exports = {
 
         // Handle the response to the "permit" dropdown
         client.on('interactionCreate', async (interaction) => {
-        // Check that the interaction is a User Select Menu
          if (!interaction.isUserSelectMenu()) return;
 
         if (interaction.customId === 'select_permitted_member') {

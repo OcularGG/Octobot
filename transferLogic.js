@@ -39,6 +39,43 @@ module.exports = async (client) => {
     // Handle button interactions
     client.on('interactionCreate', async interaction => {
       if (!interaction.isButton()) return;
+      if (interaction.customId === 'transfer_ocl') {
+        await interaction.deferReply({ ephemeral: true });
+          const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+              if (!hasPermission) {
+                  return interaction.editReply({
+                      content: 'You do not have permission to use this button.',
+                      flags: 64,
+                  });
+              }
+          
+          const member = interaction.guild.members.cache.get(interaction.user.id);
+      
+          if (!member) {
+              return interaction.editReply({ content: 'Member not found!', flags: 64 });
+          }
+      
+          // Get the current nickname
+          const currentNickname = member.nickname;
+      
+          // Check if the nickname starts with the prefix [OCLU]
+          if (currentNickname.startsWith('[OCLU]')) {
+              // Remove the [OCLU] prefix from the nickname
+              let newNickname = currentNickname.replace(/^\[OCLU\] /, '[OCL] ');
+      
+              try {
+                  // Set the new nickname with the [OCL] prefix
+                  await member.setNickname(newNickname);
+                  await interaction.reply({ content: 'Successfully removed the [U] from your nickname!', ephemeral: true });
+              } catch (error) {
+                  console.error('Error removing nickname prefix:', error);
+                  await interaction.reply({ content: 'There was an error updating your nickname.', ephemeral: true });
+              }
+          } else {
+              await interaction.reply({ content: 'Your nickname does not have the [OCLU] prefix.', ephemeral: true });
+          }
+      } 
+      
       if (interaction.customId === 'transfer') {
               const modal = new ModalBuilder()
                 .setCustomId('transferModal')
@@ -127,43 +164,4 @@ module.exports = async (client) => {
     }
 
     });
-  client.on('interactionCreate', async interaction => {
-    if (!interaction.isButton()) return;
-    if (interaction.customId === 'transfer_ocl') {
-      await interaction.deferReply({ ephemeral: true });
-        const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-            if (!hasPermission) {
-                return interaction.editReply({
-                    content: 'You do not have permission to use this button.',
-                    flags: 64,
-                });
-            }
-        
-        const member = interaction.guild.members.cache.get(interaction.user.id);
-    
-        if (!member) {
-            return interaction.editReply({ content: 'Member not found!', flags: 64 });
-        }
-    
-        // Get the current nickname
-        const currentNickname = member.nickname;
-    
-        // Check if the nickname starts with the prefix [OCLU]
-        if (currentNickname.startsWith('[OCLU]')) {
-            // Remove the [OCLU] prefix from the nickname
-            let newNickname = currentNickname.replace(/^\[OCLU\] /, '[OCL] ');
-    
-            try {
-                // Set the new nickname with the [OCL] prefix
-                await member.setNickname(newNickname);
-                await interaction.reply({ content: 'Successfully removed the [U] from your nickname!', ephemeral: true });
-            } catch (error) {
-                console.error('Error removing nickname prefix:', error);
-                await interaction.reply({ content: 'There was an error updating your nickname.', ephemeral: true });
-            }
-        } else {
-            await interaction.reply({ content: 'Your nickname does not have the [OCLU] prefix.', ephemeral: true });
-        }
-    }    
-  });
 };

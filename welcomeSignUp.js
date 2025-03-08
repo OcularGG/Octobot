@@ -18,7 +18,7 @@ client.on('guildMemberAdd', async (member) => {
     if (ocularPublicChannel) {
       console.log('Found Ocular Public channel. Sending embed...');
 
-      const welcomeImagePath = path.join(__dirname, 'welcome.png');
+      const welcomeImagePath = path.join(__dirname, 'assets', 'welcome.png');
       const pfpUrl = member.user.displayAvatarURL({ format: 'png', size: 256 }); 
 
       const welcomeImage = await loadImage(welcomeImagePath);
@@ -123,6 +123,378 @@ client.on('guildMemberAdd', async (member) => {
   // Handling button interactions
   client.on('interactionCreate', async (interaction) => {
     if (!interaction.isButton()) return; 
+
+    if (interaction.customId === 'deleteChannel') {
+      await interaction.deferReply({ flags: 64 });
+// Check if the member has Administrator permission or a specific role
+const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+
+if (!hasPermission) {
+    // If the user doesn't have permission, send a message informing them
+    await interaction.editReply({
+        content: 'You do not have permission to delete this channel.',
+        flags: 64, // Make this message visible only to the user
+    });
+    return; // Exit the function to prevent the channel from being deleted
+}
+
+// Get the channel where the interaction occurred
+const channel = interaction.channel;
+
+try {
+    // Delete the channel
+    await channel.delete();
+    console.log(`Channel ${channel.name} has been deleted.`);
+} catch (error) {
+    console.error(`Error deleting the channel: ${error.message}`);
+}
+}
+
+if (interaction.customId === 'deleteChannel2') {
+await interaction.deferReply({ flags: 64 });
+// Check if the member has Administrator permission or a specific role
+const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+
+if (!hasPermission) {
+    // If the user doesn't have permission, send a message informing them
+    await interaction.editReply({
+        content: 'You do not have permission to delete this channel.',
+        flags: 64, // Make this message visible only to the user
+    });
+    return; // Exit the function to prevent the channel from being deleted
+}
+
+// Get the channel where the interaction occurred
+const channel = interaction.channel;
+
+try {
+    // Delete the channel
+    await channel.delete();
+    console.log(`Channel ${channel.name} has been deleted.`);
+} catch (error) {
+    console.error(`Error deleting the channel: ${error.message}`);
+}
+}
+
+if (interaction.customId === 'vouched') {
+await interaction.deferReply({ flags: 64 });
+// Check if the user has the required permission first
+const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+if (!hasPermission) {
+  return interaction.editReply({
+      content: 'You do not have permission to use this button.',
+      flags: 64,
+  });
+}
+
+// Fetch the channel topic and extract the applicant ID
+const channel = interaction.channel;
+const topic = channel.topic;
+const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
+
+// Ensure that applicantId is present
+if (!applicantId) {
+return interaction.editReply({
+  content: 'Could not find the applicant ID in the channel topic.',
+  flags: 64,
+});
+}
+
+// Fetch the applicant member from the guild
+let applicant;
+try {
+applicant = await interaction.guild.members.fetch(applicantId);
+} catch (error) {
+return interaction.editReply({
+  content: 'Could not find the applicant member in the guild.',
+  flags: 64,
+});
+}
+
+if (applicant.nickname) {
+// Add "[F]" in front of the applicant's current nickname
+const newNickname = `[F] ${applicant.nickname}`;
+
+// Change the applicant's nickname
+try {
+    await applicant.setNickname(newNickname);
+    console.log(`Applicant's nickname changed to: ${newNickname}`);
+} catch (error) {
+    console.error('Error setting nickname:', error);
+    return interaction.editReply({
+        content: 'There was an error setting the applicant\'s nickname.',
+        flags: 64,
+    });
+}
+} else {
+return interaction.editReply({
+    content: 'Applicant does not have a nickname set, cannot modify it.',
+    flags: 64,
+});
+}
+
+try {
+// Fetch the role by ID
+const role = await interaction.guild.roles.cache.get('1336395198904799355');
+
+if (!role) {
+  return interaction.editReply({
+    content: 'The role could not be found.',
+    flags: 64,
+  });
+}
+
+// Add the 'vouched' role to the applicant
+await applicant.roles.add(role);
+
+return interaction.editReply({
+  content: `The applicant has been successfully vouched and given the role: ${role.name}`,
+  flags: 64,
+});
+} catch (error) {
+console.error('Error assigning role:', error);
+return interaction.editReply({
+  content: 'There was an error assigning the role to the applicant. Please try again later.',
+  flags: 64,
+});
+}
+}
+
+if (interaction.customId === 'trusted') {
+  await interaction.deferReply({ flags: 64 });
+  // Fetch the applicant's member from the guild
+  const channel = interaction.channel;
+  const topic = channel.topic;
+  const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
+  const applicant = await interaction.guild.members.fetch(applicantId); // Ensure `applicantId` is properly defined or passed
+  const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+
+  if (!hasPermission) {
+      return interaction.editReply({
+          content: 'You do not have permission to use this button.',
+          flags: 64,
+      });
+  }
+if (applicant.nickname) {
+  // Add "[TF]" in front of the applicant's current nickname
+  const newNickname = `[TF] ${applicant.nickname}`;
+
+  // Change the applicant's nickname
+  try {
+      await applicant.setNickname(newNickname);
+      console.log(`Applicant's nickname changed to: ${newNickname}`);
+  } catch (error) {
+      console.error('Error setting nickname:', error);
+      return interaction.editReply({
+          content: 'There was an error setting the applicant\'s nickname.',
+          flags: 64,
+      });
+  }
+} else {
+  return interaction.editReply({
+      content: 'Applicant does not have a nickname set, cannot modify it.',
+      flags: 64,
+  });
+}
+
+  try {
+      // Assign the 'trusted' role to the applicant
+      const role = await interaction.guild.roles.cache.get('1336395197730521133');
+      if (role) {
+          await applicant.roles.add(role);
+          return interaction.editReply({
+              content: `The applicant has been successfully confirmed as trusted and given the role: ${role.name}`,
+              flags: 64,
+          });
+      } else {
+          return interaction.editReply({
+              content: 'The role could not be found.',
+              flags: 64,
+          });
+      }
+  } catch (error) {
+      console.error('Error assigning role:', error);
+      return interaction.editReply({
+          content: 'There was an error assigning the role to the applicant. Please try again later.',
+          flags: 64,
+      });
+  }
+}
+//Ocular APP button logic
+if (interaction.customId === 'accept_ocl') {
+  await interaction.deferReply({ flags: 64 });
+  const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+  const channel = interaction.channel;
+const topic = channel.topic;
+const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
+
+if (!hasPermission) {
+  return interaction.editReply({
+    content: 'You do not have permission to use this button.',
+    flags: 64,
+  });
+}
+
+if (!applicantId) {
+  return interaction.editReply({
+    content: 'Could not find applicant information.',
+    flags: 64,
+  });
+}
+
+const applicant = await interaction.guild.members.fetch(applicantId);
+
+try {
+  await applicant.send("🎉 **Congratulations and Welcome to the OCULAR Family!** 🎉\n\n Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
+  console.log(`DM sent to ${applicant.user.tag}`);
+} catch (error) {
+  console.error('Error sending DM:', error);
+}
+
+if (applicant.nickname) {
+  // Add "[OCL]" in front of the applicant's current nickname
+  const newNickname = `[OCL] ${applicant.nickname}`;
+
+  // Change the applicant's nickname
+  try {
+      await applicant.setNickname(newNickname);
+      console.log(`Applicant's nickname changed to: ${newNickname}`);
+  } catch (error) {
+      console.error('Error setting nickname:', error);
+      return interaction.editReply({
+          content: 'There was an error setting the applicant\'s nickname.',
+          flags: 64,
+      });
+  }
+} else {
+  return interaction.editReply({
+      content: 'Applicant does not have a nickname set, cannot modify it.',
+      flags: 64,
+  });
+}
+
+
+// Assign roles for 'accept_ocl'
+const oclRole = interaction.guild.roles.cache.get('1336395193980817458');
+const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
+
+if (oclRole && portalerRole) {
+  await applicant.roles.add([oclRole, portalerRole]);
+} else {
+  return interaction.editReply({
+    content: 'Could not assign roles, please check the role IDs.',
+    flags: 64,
+  });
+}
+
+await channel.send({
+  content: `${applicant.user}, your application has been accepted to Ocular! Welcome to the guild!`,
+});
+
+await interaction.editReply({
+  content: 'The acceptance message has been sent, and roles have been assigned.',
+  flags: 64,
+});
+}
+//Uni APP button logic
+if (interaction.customId === 'accept_uni') {
+      await interaction.deferReply({ flags: 64 });
+  const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+  const channel = interaction.channel;
+const topic = channel.topic;
+const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
+
+if (!hasPermission) {
+  return interaction.editReply({
+    content: 'You do not have permission to use this button.',
+    flags: 64,
+  });
+}
+
+if (!applicantId) {
+  return interaction.editReply({
+    content: 'Could not find applicant information.',
+    flags: 64,
+  });
+}
+
+const applicant = await interaction.guild.members.fetch(applicantId);
+
+try {
+  await applicant.send("🎉 **Congratulations and Welcome to the Ocular Family!** 🎉\n\n Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
+  console.log(`DM sent to ${applicant.user.tag}`);
+} catch (error) {
+  console.error('Error sending DM:', error);
+}
+
+if (applicant.nickname) {
+  // Add "[OCLU]" in front of the applicant's current nickname
+  const newNickname = `[OCLU] ${applicant.nickname}`;
+
+  // Change the applicant's nickname
+  try {
+      await applicant.setNickname(newNickname);
+      console.log(`Applicant's nickname changed to: ${newNickname}`);
+  } catch (error) {
+      console.error('Error setting nickname:', error);
+      return interaction.editReply({
+          content: 'There was an error setting the applicant\'s nickname.',
+          flags: 64,
+      });
+  }
+} else {
+  return interaction.editReply({
+      content: 'Applicant does not have a nickname set, cannot modify it.',
+      flags: 64,
+  });
+}
+// Assign roles for 'accept_uni'
+const uniRole = interaction.guild.roles.cache.get('1336395194995834971');
+const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
+
+if (uniRole && portalerRole) {
+  await applicant.roles.add([uniRole, portalerRole]);
+} else {
+  return interaction.editReply({
+    content: 'Could not assign roles, please check the role IDs.',
+    flags: 64,
+  });
+}
+
+await channel.send({
+  content: `${applicant.user}, your application has been accepted to Uni! Welcome to the guild!`,
+});
+
+await interaction.editReply({
+  content: 'The acceptance message has been sent, and roles have been assigned.',
+  flags: 64,
+});
+}
+//Decline button logic
+if (interaction.customId === 'decline') {
+  const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
+
+if (!hasPermission) {
+  return interaction.Reply({
+    content: 'You do not have permission to use this button.',
+    flags: 64,
+  });
+} 
+const modal = new ModalBuilder()
+  .setCustomId('decline_reason_modal')
+  .setTitle('Decline Reason')
+  .addComponents(
+    new ActionRowBuilder().addComponents(
+      new TextInputBuilder()
+        .setCustomId('decline_reason_input')
+        .setLabel('Enter the reason for declining')
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true)
+    )
+  );
+
+await interaction.showModal(modal);
+}
 
     // Modal for Apply to OCULAR
     if (interaction.customId === 'apply_ocular') {
@@ -245,6 +617,32 @@ client.on('guildMemberAdd', async (member) => {
 
     // Handle application submissions
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+
+if (interaction.customId === 'decline_reason_modal') {
+  await interaction.deferReply({ flags: 64 });
+const reason = interaction.fields.getTextInputValue('decline_reason_input');
+const channel = interaction.channel;
+const topic = channel.topic;
+const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
+
+if (!applicantId) {
+return interaction.editReply({
+  content: 'Could not find applicant information.',
+  flags: 64,
+});
+}
+
+const applicant = await interaction.guild.members.fetch(applicantId);
+
+await channel.send({
+content: `${applicant.user}, your application has been declined. Reason: ${reason}`,
+});
+
+await interaction.editReply({
+content: 'The decline reason has been submitted.',
+flags: 64,
+});
+}
 
 if (interaction.customId === 'modal_apply_ocular') {
   // Defer the reply to prevent timeout
@@ -494,411 +892,5 @@ if (interaction.customId === 'modal_apply_friend') {
 
           });
 
-          client.on('interactionCreate', async (interaction) => {
-            if (!interaction.isButton()) return;
-            //Friend APP button logic
-
-            if (interaction.customId === 'deleteChannel') {
-                    await interaction.deferReply({ flags: 64 });
-              // Check if the member has Administrator permission or a specific role
-              const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-              
-              if (!hasPermission) {
-                  // If the user doesn't have permission, send a message informing them
-                  await interaction.editReply({
-                      content: 'You do not have permission to delete this channel.',
-                      flags: 64, // Make this message visible only to the user
-                  });
-                  return; // Exit the function to prevent the channel from being deleted
-              }
-      
-              // Get the channel where the interaction occurred
-              const channel = interaction.channel;
-      
-              try {
-                  // Delete the channel
-                  await channel.delete();
-                  console.log(`Channel ${channel.name} has been deleted.`);
-              } catch (error) {
-                  console.error(`Error deleting the channel: ${error.message}`);
-              }
-          }
-            
-            if (interaction.customId === 'deleteChannel2') {
-              await interaction.deferReply({ flags: 64 });
-              // Check if the member has Administrator permission or a specific role
-              const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-              
-              if (!hasPermission) {
-                  // If the user doesn't have permission, send a message informing them
-                  await interaction.editReply({
-                      content: 'You do not have permission to delete this channel.',
-                      flags: 64, // Make this message visible only to the user
-                  });
-                  return; // Exit the function to prevent the channel from being deleted
-              }
-      
-              // Get the channel where the interaction occurred
-              const channel = interaction.channel;
-      
-              try {
-                  // Delete the channel
-                  await channel.delete();
-                  console.log(`Channel ${channel.name} has been deleted.`);
-              } catch (error) {
-                  console.error(`Error deleting the channel: ${error.message}`);
-              }
-          }
-
-          if (interaction.customId === 'vouched') {
-            await interaction.deferReply({ flags: 64 });
-            // Check if the user has the required permission first
-            const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-            if (!hasPermission) {
-                return interaction.editReply({
-                    content: 'You do not have permission to use this button.',
-                    flags: 64,
-                });
-            }
-        
-            // Fetch the channel topic and extract the applicant ID
-            const channel = interaction.channel;
-            const topic = channel.topic;
-            const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
-          
-            // Ensure that applicantId is present
-            if (!applicantId) {
-              return interaction.editReply({
-                content: 'Could not find the applicant ID in the channel topic.',
-                flags: 64,
-              });
-            }
-          
-            // Fetch the applicant member from the guild
-            let applicant;
-            try {
-              applicant = await interaction.guild.members.fetch(applicantId);
-            } catch (error) {
-              return interaction.editReply({
-                content: 'Could not find the applicant member in the guild.',
-                flags: 64,
-              });
-            }
-        
-            if (applicant.nickname) {
-              // Add "[F]" in front of the applicant's current nickname
-              const newNickname = `[F] ${applicant.nickname}`;
-        
-              // Change the applicant's nickname
-              try {
-                  await applicant.setNickname(newNickname);
-                  console.log(`Applicant's nickname changed to: ${newNickname}`);
-              } catch (error) {
-                  console.error('Error setting nickname:', error);
-                  return interaction.editReply({
-                      content: 'There was an error setting the applicant\'s nickname.',
-                      flags: 64,
-                  });
-              }
-          } else {
-              return interaction.editReply({
-                  content: 'Applicant does not have a nickname set, cannot modify it.',
-                  flags: 64,
-              });
-          }
-        
-            try {
-              // Fetch the role by ID
-              const role = await interaction.guild.roles.cache.get('1336395198904799355');
-          
-              if (!role) {
-                return interaction.editReply({
-                  content: 'The role could not be found.',
-                  flags: 64,
-                });
-              }
-          
-              // Add the 'vouched' role to the applicant
-              await applicant.roles.add(role);
-          
-              return interaction.editReply({
-                content: `The applicant has been successfully vouched and given the role: ${role.name}`,
-                flags: 64,
-              });
-            } catch (error) {
-              console.error('Error assigning role:', error);
-              return interaction.editReply({
-                content: 'There was an error assigning the role to the applicant. Please try again later.',
-                flags: 64,
-              });
-            }
-        }
-        
-            if (interaction.customId === 'trusted') {
-                await interaction.deferReply({ flags: 64 });
-                // Fetch the applicant's member from the guild
-                const channel = interaction.channel;
-                const topic = channel.topic;
-                const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
-                const applicant = await interaction.guild.members.fetch(applicantId); // Ensure `applicantId` is properly defined or passed
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-            
-                if (!hasPermission) {
-                    return interaction.editReply({
-                        content: 'You do not have permission to use this button.',
-                        flags: 64,
-                    });
-                }
-            if (applicant.nickname) {
-                // Add "[TF]" in front of the applicant's current nickname
-                const newNickname = `[TF] ${applicant.nickname}`;
-        
-                // Change the applicant's nickname
-                try {
-                    await applicant.setNickname(newNickname);
-                    console.log(`Applicant's nickname changed to: ${newNickname}`);
-                } catch (error) {
-                    console.error('Error setting nickname:', error);
-                    return interaction.editReply({
-                        content: 'There was an error setting the applicant\'s nickname.',
-                        flags: 64,
-                    });
-                }
-            } else {
-                return interaction.editReply({
-                    content: 'Applicant does not have a nickname set, cannot modify it.',
-                    flags: 64,
-                });
-            }
-            
-                try {
-                    // Assign the 'trusted' role to the applicant
-                    const role = await interaction.guild.roles.cache.get('1336395197730521133');
-                    if (role) {
-                        await applicant.roles.add(role);
-                        return interaction.editReply({
-                            content: `The applicant has been successfully confirmed as trusted and given the role: ${role.name}`,
-                            flags: 64,
-                        });
-                    } else {
-                        return interaction.editReply({
-                            content: 'The role could not be found.',
-                            flags: 64,
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error assigning role:', error);
-                    return interaction.editReply({
-                        content: 'There was an error assigning the role to the applicant. Please try again later.',
-                        flags: 64,
-                    });
-                }
-            }
-            //Ocular APP button logic
-            if (interaction.customId === 'accept_ocl') {
-                await interaction.deferReply({ flags: 64 });
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-                const channel = interaction.channel;
-              const topic = channel.topic;
-              const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
-
-              if (!hasPermission) {
-                return interaction.editReply({
-                  content: 'You do not have permission to use this button.',
-                  flags: 64,
-                });
-              }
-          
-              if (!applicantId) {
-                return interaction.editReply({
-                  content: 'Could not find applicant information.',
-                  flags: 64,
-                });
-              }
-          
-              const applicant = await interaction.guild.members.fetch(applicantId);
-
-              try {
-                await applicant.send("🎉 **Congratulations and Welcome to the OCULAR Family!** 🎉\n\n Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
-                console.log(`DM sent to ${applicant.user.tag}`);
-              } catch (error) {
-                console.error('Error sending DM:', error);
-              }
-
-              if (applicant.nickname) {
-                // Add "[OCL]" in front of the applicant's current nickname
-                const newNickname = `[OCL] ${applicant.nickname}`;
-        
-                // Change the applicant's nickname
-                try {
-                    await applicant.setNickname(newNickname);
-                    console.log(`Applicant's nickname changed to: ${newNickname}`);
-                } catch (error) {
-                    console.error('Error setting nickname:', error);
-                    return interaction.editReply({
-                        content: 'There was an error setting the applicant\'s nickname.',
-                        flags: 64,
-                    });
-                }
-            } else {
-                return interaction.editReply({
-                    content: 'Applicant does not have a nickname set, cannot modify it.',
-                    flags: 64,
-                });
-              }
-              
-          
-              // Assign roles for 'accept_ocl'
-              const oclRole = interaction.guild.roles.cache.get('1336395193980817458');
-              const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
-          
-              if (oclRole && portalerRole) {
-                await applicant.roles.add([oclRole, portalerRole]);
-              } else {
-                return interaction.editReply({
-                  content: 'Could not assign roles, please check the role IDs.',
-                  flags: 64,
-                });
-              }
-          
-              await channel.send({
-                content: `${applicant.user}, your application has been accepted to Ocular! Welcome to the guild!`,
-              });
-          
-              await interaction.editReply({
-                content: 'The acceptance message has been sent, and roles have been assigned.',
-                flags: 64,
-              });
-            }
-          //Uni APP button logic
-            if (interaction.customId === 'accept_uni') {
-                    await interaction.deferReply({ flags: 64 });
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-                const channel = interaction.channel;
-              const topic = channel.topic;
-              const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
-
-              if (!hasPermission) {
-                return interaction.editReply({
-                  content: 'You do not have permission to use this button.',
-                  flags: 64,
-                });
-              }
-          
-              if (!applicantId) {
-                return interaction.editReply({
-                  content: 'Could not find applicant information.',
-                  flags: 64,
-                });
-              }
-          
-              const applicant = await interaction.guild.members.fetch(applicantId);
-
-              try {
-                await applicant.send("🎉 **Congratulations and Welcome to the Ocular Family!** 🎉\n\n Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
-                console.log(`DM sent to ${applicant.user.tag}`);
-              } catch (error) {
-                console.error('Error sending DM:', error);
-              }
-              
-              if (applicant.nickname) {
-                // Add "[OCLU]" in front of the applicant's current nickname
-                const newNickname = `[OCLU] ${applicant.nickname}`;
-        
-                // Change the applicant's nickname
-                try {
-                    await applicant.setNickname(newNickname);
-                    console.log(`Applicant's nickname changed to: ${newNickname}`);
-                } catch (error) {
-                    console.error('Error setting nickname:', error);
-                    return interaction.editReply({
-                        content: 'There was an error setting the applicant\'s nickname.',
-                        flags: 64,
-                    });
-                }
-            } else {
-                return interaction.editReply({
-                    content: 'Applicant does not have a nickname set, cannot modify it.',
-                    flags: 64,
-                });
-            }
-              // Assign roles for 'accept_uni'
-              const uniRole = interaction.guild.roles.cache.get('1336395194995834971');
-              const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
-          
-              if (uniRole && portalerRole) {
-                await applicant.roles.add([uniRole, portalerRole]);
-              } else {
-                return interaction.editReply({
-                  content: 'Could not assign roles, please check the role IDs.',
-                  flags: 64,
-                });
-              }
-          
-              await channel.send({
-                content: `${applicant.user}, your application has been accepted to Uni! Welcome to the guild!`,
-              });
-          
-              await interaction.editReply({
-                content: 'The acceptance message has been sent, and roles have been assigned.',
-                flags: 64,
-              });
-            }
-          //Decline button logic
-            if (interaction.customId === 'decline') {
-                const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
-
-              if (!hasPermission) {
-                return interaction.Reply({
-                  content: 'You do not have permission to use this button.',
-                  flags: 64,
-                });
-              } 
-              const modal = new ModalBuilder()
-                .setCustomId('decline_reason_modal')
-                .setTitle('Decline Reason')
-                .addComponents(
-                  new ActionRowBuilder().addComponents(
-                    new TextInputBuilder()
-                      .setCustomId('decline_reason_input')
-                      .setLabel('Enter the reason for declining')
-                      .setStyle(TextInputStyle.Paragraph)
-                      .setRequired(true)
-                  )
-                );
-          
-              await interaction.showModal(modal);
-            }
-          });
-          client.on('interactionCreate', async (interaction) => {
-            
-            if (!interaction.isModalSubmit()) return;
-
-            if (interaction.customId === 'decline_reason_modal') {
-                    await interaction.deferReply({ flags: 64 });
-                const reason = interaction.fields.getTextInputValue('decline_reason_input');
-                const channel = interaction.channel;
-                const topic = channel.topic;
-                const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
-              
-                if (!applicantId) {
-                  return interaction.editReply({
-                    content: 'Could not find applicant information.',
-                    flags: 64,
-                  });
-                }
-              
-                const applicant = await interaction.guild.members.fetch(applicantId);
-              
-                await channel.send({
-                  content: `${applicant.user}, your application has been declined. Reason: ${reason}`,
-                });
-              
-                await interaction.editReply({
-                  content: 'The decline reason has been submitted.',
-                  flags: 64,
-                });
-              }
-          });
 }
       
