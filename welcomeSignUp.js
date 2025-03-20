@@ -201,15 +201,20 @@ return interaction.editReply({
 }
 
 // Fetch the applicant member from the guild
-let applicant;
-try {
-applicant = await interaction.guild.members.fetch(applicantId);
-} catch (error) {
-return interaction.editReply({
-  content: 'Could not find the applicant member in the guild.',
-  flags: 64,
-});
-}
+let applicant = null;
+  try {
+    applicant = await interaction.guild.members.fetch(applicantId);
+    console.log(`Applicant fetched: ${applicant}`);
+  } catch (error) {
+    console.error('Error fetching applicant:', error);
+  }
+
+  if (!applicant) {
+    return interaction.editReply({
+      content: 'Applicant not found in the guild.',
+      flags: 64,
+    });
+  }
 
 if (applicant.nickname) {
 // Add "[F]" in front of the applicant's current nickname
@@ -266,7 +271,6 @@ if (interaction.customId === 'trusted') {
   const channel = interaction.channel;
   const topic = channel.topic;
   const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
-  const applicant = await interaction.guild.members.fetch(applicantId); // Ensure `applicantId` is properly defined or passed
   const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
 
   if (!hasPermission) {
@@ -275,6 +279,22 @@ if (interaction.customId === 'trusted') {
           flags: 64,
       });
   }
+
+  let applicant = null;
+  try {
+    applicant = await interaction.guild.members.fetch(applicantId);
+    console.log(`Applicant fetched: ${applicant}`);
+  } catch (error) {
+    console.error('Error fetching applicant:', error);
+  }
+
+  if (!applicant) {
+    return interaction.editReply({
+      content: 'Applicant not found in the guild.',
+      flags: 64,
+    });
+  }
+
 if (applicant.nickname) {
   // Add "[TF]" in front of the applicant's current nickname
   const newNickname = `[TF] ${applicant.nickname}`;
@@ -320,91 +340,109 @@ if (applicant.nickname) {
       });
   }
 }
-//Ocular APP button logic
+//Ocular APP logic
 if (interaction.customId === 'accept_ocl') {
   await interaction.deferReply({ flags: 64 });
   const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
   const channel = interaction.channel;
-const topic = channel.topic;
-const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
+  const topic = channel.topic;
+  const applicantId = topic ? topic.split('Applicant ID: ')[1] : null;
 
-if (!hasPermission) {
-  return interaction.editReply({
-    content: 'You do not have permission to use this button.',
-    flags: 64,
-  });
-}
+  if (!hasPermission) {
+    return interaction.editReply({
+      content: 'You do not have permission to use this button.',
+      flags: 64,
+    });
+  }
 
-if (!applicantId) {
-  return interaction.editReply({
-    content: 'Could not find applicant information.',
-    flags: 64,
-  });
-}
+  if (!applicantId) {
+    return interaction.editReply({
+      content: 'Could not find applicant information.',
+      flags: 64,
+    });
+  }
 
-try {
-    const applicant = await interaction.guild.members.fetch(applicantId);
-} catch (error) {
-    if (error.code === 10007) {
-        console.log(`Applicant with ID ${applicantId} is no longer in the guild.`);
-    } else {
-        throw error;
-    }
-}
-
-try {
-  await applicant.send("🎉 **Congratulations and Welcome to the OCULAR Family!** 🎉\n\n Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
-  console.log(`DM sent to ${applicant.user.tag}`);
-} catch (error) {
-  console.error('Error sending DM:', error);
-}
-
-if (applicant.nickname) {
-  // Add "[OCL]" in front of the applicant's current nickname
-  const newNickname = `[OCL] ${applicant.nickname}`;
-
-  // Change the applicant's nickname
+  // Fetch applicant and handle errors
+  let applicant = null;
   try {
+    applicant = await interaction.guild.members.fetch(applicantId);
+    console.log(`Applicant fetched: ${applicant}`);  // This will log the applicant object if successful
+  } catch (error) {
+    console.error('Error fetching applicant:', error); // Logs the error if fetching fails
+  }
+
+  // Log the value of applicant (whether it's null or an object)
+  console.log(`Applicant variable is:`, applicant);
+
+  if (!applicant) {
+    return interaction.editReply({
+      content: 'Applicant not found in the guild.',
+      flags: 64,
+    });
+  }
+  
+    console.log(`applicant variable is "${applicant}"`)
+  // Check if the applicant exists after fetch
+  if (!applicant) {
+    return; // Exit early if applicant is not defined
+  }
+
+  try {
+    // Send DM to the applicant
+    await applicant.send("🎉 **Congratulations and Welcome to the OCULAR Family!** 🎉\n\nWe're thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure you're all set for success. https://bit.ly/43jUoYy");
+    console.log(`DM sent to ${applicant.user.tag}`);
+  } catch (error) {
+    console.error('Error sending DM:', error);
+  }
+
+  if (applicant.nickname) {
+    // Add "[OCL]" in front of the applicant's current nickname
+    const newNickname = `[OCL] ${applicant.nickname}`;
+
+    try {
+      // Change the applicant's nickname
       await applicant.setNickname(newNickname);
       console.log(`Applicant's nickname changed to: ${newNickname}`);
-  } catch (error) {
+    } catch (error) {
       console.error('Error setting nickname:', error);
       return interaction.editReply({
-          content: 'There was an error setting the applicant\'s nickname.',
-          flags: 64,
+        content: 'There was an error setting the applicant\'s nickname.',
+        flags: 64,
       });
-  }
-} else {
-  return interaction.editReply({
+    }
+  } else {
+    return interaction.editReply({
       content: 'Applicant does not have a nickname set, cannot modify it.',
       flags: 64,
+    });
+  }
+
+  // Assign roles for 'accept_ocl'
+  const oclRole = interaction.guild.roles.cache.get('1336395193980817458');
+  const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
+
+  if (oclRole && portalerRole) {
+    await applicant.roles.add([oclRole, portalerRole]);
+  } else {
+    return interaction.editReply({
+      content: 'Could not assign roles, please check the role IDs.',
+      flags: 64,
+    });
+  }
+
+  // Send a message to the channel
+  await channel.send({
+    content: `${applicant.user}, your application has been accepted to Ocular! Welcome to the guild!`,
   });
-}
 
-
-// Assign roles for 'accept_ocl'
-const oclRole = interaction.guild.roles.cache.get('1336395193980817458');
-const portalerRole = interaction.guild.roles.cache.get('1336395195775717481');
-
-if (oclRole && portalerRole) {
-  await applicant.roles.add([oclRole, portalerRole]);
-} else {
-  return interaction.editReply({
-    content: 'Could not assign roles, please check the role IDs.',
+  // Final reply
+  await interaction.editReply({
+    content: 'The acceptance message has been sent, and roles have been assigned.',
     flags: 64,
   });
 }
 
-await channel.send({
-  content: `${applicant.user}, your application has been accepted to Ocular! Welcome to the guild!`,
-});
-
-await interaction.editReply({
-  content: 'The acceptance message has been sent, and roles have been assigned.',
-  flags: 64,
-});
-}
-//Uni APP button logic
+//Uni APP logic
 if (interaction.customId === 'accept_uni') {
       await interaction.deferReply({ flags: 64 });
   const hasPermission = interaction.member.permissions.has(PermissionFlagsBits.Administrator) || interaction.member.roles.cache.has('1336395122534776924');
@@ -426,7 +464,20 @@ if (!applicantId) {
   });
 }
 
-const applicant = await interaction.guild.members.fetch(applicantId);
+let applicant = null;
+  try {
+    applicant = await interaction.guild.members.fetch(applicantId);
+    console.log(`Applicant fetched: ${applicant}`);
+  } catch (error) {
+    console.error('Error fetching applicant:', error);
+  }
+
+  if (!applicant) {
+    return interaction.editReply({
+      content: 'Applicant not found in the guild.',
+      flags: 64,
+    });
+  }
 
 try {
   await applicant.send("🎉 **Congratulations and Welcome to the Ocular Family!** 🎉\n\n Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");
