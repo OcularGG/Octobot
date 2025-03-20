@@ -342,7 +342,15 @@ if (!applicantId) {
   });
 }
 
-const applicant = await interaction.guild.members.fetch(applicantId);
+try {
+    const applicant = await interaction.guild.members.fetch(applicantId);
+} catch (error) {
+    if (error.code === 10007) {
+        console.log(`Applicant with ID ${applicantId} is no longer in the guild.`);
+    } else {
+        throw error;
+    }
+}
 
 try {
   await applicant.send("🎉 **Congratulations and Welcome to the OCULAR Family!** 🎉\n\n Were thrilled to have you with us! To help you get started and familiarize yourself with everything Ocular, please take a moment to review our onboarding file. It will guide you through the ways of Ocular and ensure youre all set for success. https://bit.ly/43jUoYy");

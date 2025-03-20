@@ -1,4 +1,4 @@
-// feedbackThreading and AutoReaction
+// Threading and AutoReaction
 const { Client, GatewayIntentBits,EmbedBuilder } = require('discord.js');
 
 module.exports = (client) => {
@@ -10,11 +10,10 @@ module.exports = (client) => {
   };
 
   const OcularGeneralID = '1097537635205009560'; // Channel to send the embed
-
-  const CHANNEL_ID = '1345088516475977738';
-
-  const REACTION_THRESHOLD = 25; // Set the number of reactions required to trigger the embed
-
+  const feedbackChannel = '1345088516475977738';  //feedback channel id
+  const reactionThreshold = 25; // Set the number of reactions required to trigger the embed REACTION_THRESHOLD
+  const questionChannelId = '1297601718506360915'; //questions channel id
+  const suggestionChannelId = '1336397641461923961'; //suggestions channel id
   client.on('messageCreate', async (message) => {
 
     if (channelReactions[message.channel.id]) {
@@ -26,13 +25,54 @@ module.exports = (client) => {
     }
     
     if (message.content.includes('@everyone') || message.content.includes('@here')) {
-      if (message.author.id === '1207434980855259206') return;
+      if (message.author.id === '1207434980855259206' || message.author.id === '390634916875862017') return;
       if (message.channel.id === '1105324018447433748') return;
       await message.delete();
       console.log('Deleted a message mentioning @everyone or @here:', message.content);
     }
 
-    if (message.channel.id === CHANNEL_ID) {
+    if (message.channel.id ===  questionChannelId) {
+      try {
+        if (message.reference) {
+          await message.delete();
+          console.log('Deleted a reply message:', message.content);
+        }
+        else {
+          if (!message.hasThread) {
+            await message.startThread({
+              name: `${message.author.username}'s Question`,
+              reason: 'Auto-threading message',
+            });
+            console.log('Thread created for message:', message.content);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing message:', error);
+      }
+    };
+
+    if (message.channel.id ===  suggestionChannelId) {
+      try {
+        if (message.reference) {
+          await message.delete();
+          console.log('Deleted a reply message:', message.content);
+        }
+        else {
+          if (!message.hasThread) {
+            await message.startThread({
+              name: `Suggestion from: ${message.author.username}`,
+              reason: 'Auto-threading message',
+            });
+            console.log('Thread created for message:', message.content);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing message:', error);
+      }
+    };
+
+
+    if (message.channel.id ===  feedbackChannel) {
       try {
         if (message.reference) {
           await message.delete();
@@ -52,6 +92,7 @@ module.exports = (client) => {
       }
     }
   });
+
 
   client.on('messageReactionAdd', async (reaction, user) => {
     // Ignore reactions from bots
@@ -75,7 +116,7 @@ module.exports = (client) => {
       console.log(`Total number of reactions on the message: ${totalReactions}`);
 
       // If the total number of reactions exceeds the threshold, send the embed
-      if (totalReactions >= REACTION_THRESHOLD) {
+      if (totalReactions >= reactionThreshold) {
         let targetChannelName;
         if (reaction.message.channel.id === '1279139853854052475') {
           targetChannelName = 'Hall of Salt';

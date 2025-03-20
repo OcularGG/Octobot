@@ -7,7 +7,7 @@ const logRoleHierarchy = require('./logRoleHierarchy'); // Path to logRoleHierar
 const initializeWelcome = require('./welcomeSignUp'); //path to welcomeSignUp.js
 const voiceChannel = require('./voiceChannel'); //path to voiceChannel.js
 const transferLogic = require('./transferLogic'); //path to transferLogic.js
-const feedbackAndReactions = require('./feedbackAndReactions'); // Path to feedbackAndReactions.js
+const threadingAndReactions = require('./threadingAndReactions'); // Path to threadingAndReactions.js
 const mammothWarning = require('./mammothWarning'); // Path to mammothWarning.js
 // Create a new client instance
 const client = new Client({
@@ -69,7 +69,7 @@ client.on('ready', () => {
   mammothWarning(client);
   
   // Call the feedbackThreading function to create threads for messages in a specific channel
-  feedbackAndReactions(client);
+  threadingAndReactions(client);
 
   // Call the initializeWelcome function to send a welcome message to new members
   initializeWelcome(client);
